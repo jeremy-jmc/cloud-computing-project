@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: API de Clientes
+  description: API para gestionar los clientes del gimnasio.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8001
+    description: Servidor de desarrollo
+
+paths:
+  /clientes/{dni}:
+    parameters:
+      - in: path
+        name: dni
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Obtener cliente por DNI
+      responses:
+        '200':
+          description: Detalles del cliente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  nombre:
+                    type: string
+                    example: "Juan Perez"
+                  dni:
+                    type: string
+                    example: "12345678"
+                  correo:
+                    type: string
+                    example: "juanperez@example.com"
+                  telefono:
+                    type: string
+                    example: "+51987654321"
+                  membresia_id:
+                    type: integer
+                    example: 2
+        '404':
+          description: Cliente no encontrado
+
+    put:
+      summary: Actualizar cliente por DNI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: "Juan Perez"
+                correo:
+                  type: string
+                  example: "juanperez@example.com"
+                telefono:
+                  type: string
+                  example: "+51987654321"
+      responses:
+        '200':
+          description: Cliente actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: "Cliente actualizado correctamente"
+                  detalles_cliente:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      nombre:
+                        type: string
+                        example: "Juan Perez"
+                      dni:
+                        type: string
+                        example: "12345678"
+                      correo:
+                        type: string
+                        example: "juanperez@example.com"
+                      telefono:
+                        type: string
+                        example: "+51987654321"
+        '404':
+          description: Cliente no encontrado
+
+    delete:
+      summary: Eliminar cliente por DNI
+      responses:
+        '200':
+          description: Cliente eliminado exitosamente
+        '404':
+          description: Cliente no encontrado

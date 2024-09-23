@@ -1,0 +1,157 @@
+openapi: 3.0.0
+info:
+  title: API Orquestador
+  description: Orquesta la verificación, visualización de promociones y renovación de membresías.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8004
+    description: Servidor de desarrollo
+
+paths:
+  /orquestador/verificar_membresia:
+    post:
+      summary: Verificar si un cliente tiene una membresía activa o caducada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dni:
+                  type: string
+                  example: "12345678"
+      responses:
+        '200':
+          description: Membresía verificada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: "Membresía activa"
+                  detalles_membresia:
+                    type: object
+                    properties:
+                      tipo:
+                        type: string
+                        example: "Mensual"
+                      fecha_fin:
+                        type: string
+                        example: "2024-12-31"
+        '404':
+          description: Cliente o membresía no encontrados
+
+  /orquestador/mostrar_promos:
+    get:
+      summary: Mostrar las promociones disponibles
+      responses:
+        '200':
+          description: Lista de promociones disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    promocion_id:
+                      type: integer
+                      example: 1
+                    nombre:
+                      type: string
+                      example: "Descuento Verano"
+                    descuento:
+                      type: number
+                      example: 20
+                    tipo_membresia:
+                      type: string
+                      example: "Anual"
+        '404':
+          description: No hay promociones disponibles
+
+  /orquestador/renovar_membresia:
+    post:
+      summary: Renovar la membresía del cliente aplicando una promoción
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dni:
+                  type: string
+                  example: "12345678"
+                promocion_id:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Membresía renovada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: "Membresía renovada exitosamente"
+                  detalles_membresia:
+                    type: object
+                    properties:
+                      tipo:
+                        type: string
+                        example: "Anual"
+                      fecha_fin:
+                        type: string
+                        example: "2025-12-31"
+                      descuento_aplicado:
+                        type: number
+                        example: 20
+        '404':
+          description: Cliente, membresía o promoción no encontrados
+
+
+# * UI (DNI) → Orquestador (POST /orquestador/verificar_membresia):
+
+#     La UI envía el DNI para verificar la membresía del cliente.
+#     El Orquestador verifica el cliente:
+#         Orquestador → Microservicio de Clientes (GET /clientes/{dni})
+#         Orquestador → Microservicio de Membresías (GET /membresias/{dni})
+#     Respuesta del Orquestador:
+#         Si la membresía está activa, responde a la UI con un mensaje de confirmación.
+#         Si está caducada, la UI procede a solicitar las promociones.
+
+# * UI (solicitud de promociones) → Orquestador (GET /orquestador/mostrar_promos):
+
+#     La UI pide al Orquestador la lista de promociones disponibles.
+#     El Orquestador hace una llamada a:
+#         Orquestador → Microservicio de Promociones (GET /promociones)
+#     El Orquestador devuelve a la UI la lista de promociones disponibles.
+
+# * UI (selección de promoción) → Orquestador (POST /orquestador/renovar_membresia):
+
+#     El cliente selecciona una promoción y la UI envía el DNI y el ID de la promoción al Orquestador.
+#     El Orquestador valida la promoción y renueva la membresía:
+#         Orquestador → Microservicio de Clientes (GET /clientes/{dni})
+#         Orquestador → Microservicio de Membresías (GET /membresias/{dni})
+#         Orquestador → Microservicio de Promociones (GET /promociones/{id})
+#         Orquestador → Microservicio de Membresías (POST /membresias) (renovación de la membresía)
+#     El Orquestador responde a la UI con la confirmación de la renovación exitosa.
+
+
+
+
+# Flujo de la UI
+#     El cliente ingresa su DNI y verifica su membresía.
+#         Métodos invocados: POST /orquestador/verificar_membresia, GET /clientes/{dni}.
+#     Si la membresía está caducada, se muestran las promociones.
+#         Método invocado: GET /promociones.
+#     El cliente selecciona una promoción para renovar la membresía.
+#         Métodos invocados: POST /orquestador/renovar_membresia, GET /promociones/{id}.
+#     El cliente actualiza su información personal.
+#         Método invocado: PUT /clientes/{dni}.
