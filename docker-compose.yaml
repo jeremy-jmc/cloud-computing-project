@@ -1,45 +1,27 @@
 version: '3'
 services:
-  # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
-  # mongosh --username admin --password 
-  mongodb:
-    image: mongodb/mongodb-community-server:latest
-    container_name: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-      - ./api-promociones/init.js:/docker-entrypoint-initdb.d/init.js
-    environment:
-      MONGODB_INITDB_ROOT_USERNAME: admin
-      MONGODB_INITDB_ROOT_PASSWORD: password
-      MONGODB_INITDB_DATABASE: promociones_db
-    networks:
-      - api-network
-    # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
-
-  api:
+  api_promociones:
     build:
       context: ./api-promociones
       dockerfile: Dockerfile
     container_name: node-api
     ports:
       - "8003:8003"
-    environment:
-      - MONGO_URL=mongodb://admin:password@mongo:27017/promociones_db?authSource=admin
-    depends_on:
-      - mongodb
     volumes:
       - ./api-promociones:/app
-    networks:
-      - api-network
-    command: "npm run dev"
-
-volumes:
-  mongo-data:
-    driver: local
-    name: mongo-data
-
-networks:
-  api-network:
-    driver: bridge
+    environment:
+      - MONGO_URI=mongodb://mongo/promociones_db
+    links:
+      - mongo
+  # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
+  # mongosh --username admin --password 
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./api-promociones/init.js:/docker-entrypoint-initdb.d/init.js
+    logging:
+      driver: none
+  # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'

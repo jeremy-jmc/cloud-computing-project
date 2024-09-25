@@ -2,7 +2,7 @@
 db = db.getSiblingDB('promociones_db');
 
 // Definir esquema y colección
-db.createCollection('Promocion', {
+db.createCollection('promocions', {
   validator: {
     $jsonSchema: {
       bsonType: "object",
@@ -32,7 +32,7 @@ db.createCollection('Promocion', {
 });
 
 // Insertar datos de ejemplo en la colección "Promocion"
-db.Promocion.insertMany([
+db.promocions.insertMany([
   {
     promocion_id: 1,
     nombre: "Promoción Verano",
@@ -55,4 +55,4 @@ db.Promocion.insertMany([
 
 // Mostrar los datos insertados
 print("Datos insertados en la colección 'Promocion':");
-printjson(db.Promocion.find().toArray());
+printjson(db.promocions.find().toArray());
