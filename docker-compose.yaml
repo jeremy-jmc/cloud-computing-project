@@ -12,8 +12,8 @@ services:
       - /app/node_modules
     environment:
       - MONGO_URI=mongodb://mongo/promociones_db
-    links:
-      - mongo
+    networks:
+      - promociones-network
   # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
   # mongosh --username admin --password 
   mongo:
@@ -25,6 +25,12 @@ services:
       - ./api-promociones/init.js:/docker-entrypoint-initdb.d/init.js
     logging:
       driver: none
+    networks:
+      - promociones-network
+
+networks:
+  promociones-network:
+    driver: bridge
   # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
 
   # api_clientes:
