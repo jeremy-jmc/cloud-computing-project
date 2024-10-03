@@ -1,0 +1,11 @@
+fastapi[all]
+SQLAlchemy
+psycopg2-binary
+pydantic
+uvicorn
+python-dotenv
+pymysql
+cryptography
+# mysqlclient
+# asyncmy
+# greenlet

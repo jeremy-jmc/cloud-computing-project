@@ -11,14 +11,16 @@ services:
       - ./api-promociones:/app
       - /app/node_modules
     environment:
-      - MONGO_URI=mongodb://mongo/promociones_db
+      - MONGO_URI=mongodb://my_mongo_database/promociones_db
+    depends_on:
+      - my_mongo_database
     networks:
       - promociones-network
   # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
   # mongosh --username admin --password 
-  mongo:
+  my_mongo_database:
     image: mongo
-    container_name: mongo
+    container_name: my_mongo_database
     ports:
       - "27017:27017"
     volumes:
@@ -27,38 +29,56 @@ services:
       driver: none
     networks:
       - promociones-network
+  # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
+
+  api_clientes:
+    build:
+      context: ./api-clientes
+      dockerfile: Dockerfile
+    container_name: api-clientes-fastapi
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./api-clientes:/app
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=utec
+      - DB_HOST=mysql_database
+      - DB_PORT=3306
+      - DB_NAME=mysql
+      # - DB_URI=value
+    depends_on:
+      - mysql_database
+    networks:
+      - clientes-network
+
+  mysql_database:
+    image: mysql:8.0
+    container_name: mysql_database
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: utec
+      # MYSQL_DATABASE: mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    #   - ./api-clientes/init.sql:/docker-entrypoint-initdb.d/init.sql
+    logging:
+      driver: none
+    networks:
+      - clientes-network
+    
+  # adminer_c:
+  #   image: adminer
+  #   container_name: adminer_c
+  #   ports:
+  #     - "8080:8080"
+
+volumes:
+  mysql_data:
 
 networks:
   promociones-network:
     driver: bridge
-  # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
-
-  # api_clientes:
-  #   build:
-  #     context: ./api-clientes
-  #     dockerfile: Dockerfile
-  #   container_name: api-clientes-fastapi
-  #   ports:
-  #     - "8002:8002"
-  #   volumes:
-  #     - ./api-clientes:/app
-  #   environment:
-  #     - DB_USER=value
-  #     - DB_PASSWORD=value
-  #     - DB_HOST=value
-  #     - DB_PORT=value
-  #     - DB_NAME=value
-  #     # - DB_URI=value
-
-  # mysql_database:
-  #   image: mysql:5.7
-  #   container_name: mysql_database
-  #   ports:
-  #     - "3306:3306"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root
-  #     MYSQL_DATABASE: clientes_db
-  #   volumes:
-  #     - ./api-clientes/init.sql:/docker-entrypoint-initdb.d/init.sql
-  #   logging:
-  #     driver: none
+  clientes-network:
+    driver: bridge

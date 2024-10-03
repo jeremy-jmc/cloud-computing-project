@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"github.com/gorilla/mux"
 )
 
@@ -17,7 +18,9 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(":8002", router))
 
-	
-
 }
 
+/*
+go get github.com/gorilla/mux
+go get github.com/lib/pq
+*/
