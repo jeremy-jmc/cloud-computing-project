@@ -1,5 +1,10 @@
 version: '3'
 services:
+# ORQUESTADOR
+
+# MEMBRESIAS
+
+# PROMOCIONES
   api_promociones:
     build:
       context: ./api-promociones
@@ -16,8 +21,7 @@ services:
       - my_mongo_database
     networks:
       - promociones-network
-  # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
-  # mongosh --username admin --password 
+
   my_mongo_database:
     image: mongo
     container_name: my_mongo_database
@@ -29,15 +33,18 @@ services:
       driver: none
     networks:
       - promociones-network
-  # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
+    # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
+    # mongosh --username admin --password 
+    # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
 
+# CLIENTES
   api_clientes:
     build:
       context: ./api-clientes
       dockerfile: Dockerfile
     container_name: api-clientes-fastapi
     ports:
-      - "8002:8002"
+      - "8001:8001"
     volumes:
       - ./api-clientes:/app
     environment:
@@ -46,7 +53,6 @@ services:
       - DB_HOST=mysql_database
       - DB_PORT=3306
       - DB_NAME=mysql
-      # - DB_URI=value
     depends_on:
       - mysql_database
     networks:
