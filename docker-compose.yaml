@@ -1,4 +1,5 @@
 version: '3'
+# docker-compose logs -f api_membresias api_promociones api_clientes
 services:
 # ORQUESTADOR
 
@@ -61,9 +62,12 @@ services:
     ports:
       - "27017:27017"
     volumes:
+      - mongodb_data:/data/db
       - ./api-promociones/init.js:/docker-entrypoint-initdb.d/init.js
     networks:
       - promociones-network
+    # logging:
+    #   driver: "none"
     # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
     # mongosh --username admin --password 
     # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
@@ -112,6 +116,7 @@ services:
 volumes:
   mysql_data:
   postgresql_data:
+  mongodb_data:
 
 networks:
   promociones-network:
