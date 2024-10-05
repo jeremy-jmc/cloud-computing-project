@@ -1,7 +1,23 @@
 version: '3'
-# docker-compose logs -f api_membresias api_promociones api_clientes
+# docker compose logs -f api_membresias api_promociones api_clientes api_orquestador
 services:
 # ORQUESTADOR
+  api_orquestador:
+    build:
+      context: ./api-orquestador
+      dockerfile: Dockerfile
+    container_name: api-orquestador-fastapi
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api-orquestador:/app
+    depends_on:
+      - api_clientes
+      - api_membresias
+      - api_promociones
+    networks:
+      - api-network
+      
 
 # MEMBRESIAS
   api_membresias:
@@ -23,6 +39,7 @@ services:
       - postgresql_database
     networks:
       - membresias-network
+      - api-network
     
   postgresql_database:
     image: postgres:16
@@ -55,6 +72,7 @@ services:
       - mongo_database
     networks:
       - promociones-network
+      - api-network
 
   mongo_database:
     image: mongo
@@ -92,6 +110,7 @@ services:
       - mysql_database
     networks:
       - clientes-network
+      - api-network
 
   mysql_database:
     image: mysql:8.0
@@ -124,4 +143,6 @@ networks:
   clientes-network:
     driver: bridge
   membresias-network:
+    driver: bridge
+  api-network:
     driver: bridge

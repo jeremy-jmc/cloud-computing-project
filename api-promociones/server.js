@@ -26,6 +26,10 @@ const promocionSchema = new mongoose.Schema({
 
 const Promocion = mongoose.model('promocions', promocionSchema);
 
+app.get('/', (req, res) => {
+  res.json({ message: 'API Promociones is alive' });
+});
+
 // Obtener todas las promociones
 app.get('/promociones', async (req, res) => {
     try {

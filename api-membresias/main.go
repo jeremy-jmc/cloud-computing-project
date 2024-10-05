@@ -69,10 +69,19 @@ func main() {
     initializeDB()
 
     router := mux.NewRouter()
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("I'm alive"))
-	}).Methods("GET")
+    router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        response := struct {
+            StatusCode int    `json:"status_code"`
+            Message    string `json:"message"`
+        }{
+            StatusCode: http.StatusOK,
+            Message:    "API Membresias is alive",
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        json.NewEncoder(w).Encode(response)
+    }).Methods("GET")
     router.HandleFunc("/membresias/{dni}", getMembresia).Methods("GET")
     router.HandleFunc("/membresias/{dni}", createOrRenewMembresia).Methods("POST")
     router.HandleFunc("/membresias/{dni}", updateMembresia).Methods("PUT")

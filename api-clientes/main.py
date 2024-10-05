@@ -5,6 +5,9 @@ from models import Cliente, ClienteModel
 
 app = FastAPI()
 
+@app.get("/")
+def is_alive():
+    return {"message": "API Clientes is alive"}
 
 # Recibe el cliente por DNI
 @app.get("/clientes/{dni}")
