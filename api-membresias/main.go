@@ -82,6 +82,7 @@ func main() {
         w.WriteHeader(http.StatusOK)
         json.NewEncoder(w).Encode(response)
     }).Methods("GET")
+    
     router.HandleFunc("/membresias/{dni}", getMembresia).Methods("GET")
     router.HandleFunc("/membresias/{dni}", createOrRenewMembresia).Methods("POST")
     router.HandleFunc("/membresias/{dni}", updateMembresia).Methods("PUT")

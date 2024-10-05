@@ -115,12 +115,11 @@ paths:
         '404':
           description: Cliente, membresía o promoción no encontrados
 
-
 # * UI (DNI) → Orquestador (POST /orquestador/verificar_membresia):
 
 #     La UI envía el DNI para verificar la membresía del cliente.
 #     El Orquestador verifica el cliente:
-#         Orquestador → Microservicio de Clientes (GET /clientes/{dni})
+#         Orquestador → Microservicio de Clientes (GET /clientes/real/{dni})
 #         Orquestador → Microservicio de Membresías (GET /membresias/{dni})
 #     Respuesta del Orquestador:
 #         Si la membresía está activa, responde a la UI con un mensaje de confirmación.
@@ -143,15 +142,27 @@ paths:
 #         Orquestador → Microservicio de Membresías (POST /membresias) (renovación de la membresía)
 #     El Orquestador responde a la UI con la confirmación de la renovación exitosa.
 
-
+# UI (DNI) -> Orquestador (POST /orquestador/cancelar_membresia)
+#    La UI envia el DNI  para cancelar la membresia del cliente
+#    Orquestador -> Coloca en estado inactivo al cliente (PUT /clientes/{dni})
+#    Orquestador -> Actualiza la fecha de fin de la membresia (PUT /membresias/{dni})
 
 
 # Flujo de la UI
 #     El cliente ingresa su DNI y verifica su membresía.
 #         Métodos invocados: POST /orquestador/verificar_membresia, GET /clientes/{dni}.
-#     Si la membresía está caducada, se muestran las promociones.
+
+#     Si la membresía está caducada, se muestran las promociones generales y exclusivas por haber sido cliente activo.
 #         Método invocado: GET /promociones.
+#     Si el cliente es un invitado, se muestran las promociones generales y exclusivas por ser nuevo.
+#         Método invocado: GET /promociones.
+
 #     El cliente selecciona una promoción para renovar la membresía.
 #         Métodos invocados: POST /orquestador/renovar_membresia, GET /promociones/{id}.
+
 #     El cliente actualiza su información personal.
 #         Método invocado: PUT /clientes/{dni}.
+
+#    El cliente cancela su membresía.
+#         Métodos invocados: POST /orquestador/cancelar_membresia, PUT /clientes/{dni}, PUT /membresias/{dni}.
+
