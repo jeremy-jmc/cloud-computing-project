@@ -24,7 +24,7 @@ class ClienteReal(Base):
     
     dni = Column(String(50), ForeignKey("cliente.dni"), primary_key=True, index=True)    
     activo = Column(Boolean, default=True)
-    fecha_registro = Column(DateTime, default=datetime.datetime.now())
+    fecha_registro = Column(DateTime, default=datetime.now())
 
     __mapper_args__ = {
         "polymorphic_identity": "cliente_real"
@@ -34,7 +34,7 @@ class ClienteInvitado(Base):
     __tablename__ = "cliente_invitado"
 
     dni = Column(String(50), ForeignKey("cliente.dni"), primary_key=True, index=True)
-    fecha_invitacion = Column(DateTime, default=datetime.datetime.now())
+    fecha_invitacion = Column(DateTime, default=datetime.now())
     referido_por = Column(String(50)) # DNI del cliente que lo refirio
 
     _mapper_args = {
@@ -53,7 +53,6 @@ class ClienteModel(BaseModel):
     nombre: str
     apellido: str
     email: str
-    activo: bool
 
 class ClienteInvitadoModel(BaseModel):
     dni: str
@@ -61,3 +60,16 @@ class ClienteInvitadoModel(BaseModel):
     apellido: str
     email: str
     referido_por: str
+
+# Truncate tables
+
+from sqlalchemy.orm import Session
+from db import get_db
+from models import Cliente, ClienteReal, ClienteInvitado
+from sqlalchemy import delete
+
+def truncate_table(db: Session):
+    db.execute(delete(ClienteReal))
+    db.execute(delete(ClienteInvitado))
+    db.execute(delete(Cliente))
+    db.commit()

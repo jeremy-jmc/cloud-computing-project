@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
-from models import Cliente, ClienteModel, ClienteReal, ClienteInvitado, ClienteInvitadoModel
+from models import Cliente, ClienteModel, ClienteReal, ClienteInvitado, ClienteInvitadoModel, truncate_table
 
 app = FastAPI()
 
@@ -164,6 +164,9 @@ def delete_cliente(dni: str, db: Session = Depends(get_db)):
 
 def create_cliente(cliente: ClienteModel, db: Session):
     db_cliente = Cliente(dni=cliente.dni, nombre=cliente.nombre, apellido=cliente.apellido, email=cliente.email)
+
+    print("db_cliente", db_cliente)
+
     if db.query(Cliente).filter(Cliente.dni == db_cliente.dni).first() :
         return {
             "status": "400",
@@ -210,21 +213,35 @@ def create_cliente_real(cliente: ClienteModel, db: Session = Depends(get_db)):
     db.add(db_cliente_real)
     db.commit()
     db.refresh(db_cliente_real)
+    return response
 
 @app.post("/clientes/invitado/")
 def create_cliente_invitado(cliente: ClienteInvitadoModel, db: Session = Depends(get_db)):
     
     ClienteM = ClienteModel(dni=cliente.dni, nombre=cliente.nombre, apellido=cliente.apellido, email=cliente.email)
+    print("ClienteM", ClienteM)
     response = create_cliente(ClienteM, db)
 
 
     if response["status"] != "200":
         return response
             
-    db_cliente_inv = ClienteInvitadoModel(dni=response["data"]["dni"], activo=True)
+    db_cliente_inv = ClienteInvitado(dni=response["data"]["dni"], referido_por=cliente.referido_por)
 
     db.add(db_cliente_inv)
     db.commit()
     db.refresh(db_cliente_inv)
+    return response
 
 # ------------------- Crear cliente -------------------
+
+# ------------------- Borrar cliente -------------------
+
+@app.delete("/clientes/")
+def delete_clientes(db: Session = Depends(get_db)):
+    truncate_table(db)
+    return {
+        "status": "200",
+        "message": "Clientes borrados",
+        "data": None
+    }
