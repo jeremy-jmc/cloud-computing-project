@@ -3,7 +3,40 @@ services:
 # ORQUESTADOR
 
 # MEMBRESIAS
-
+  api_membresias:
+    build:
+      context: ./api-membresias
+      dockerfile: Dockerfile
+    container_name: api-membresias-golang
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./api-membresias:/app
+    environment:
+      - DB_HOST=postgresql_database
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=postgres
+    depends_on:
+      - postgresql_database
+    networks:
+      - membresias-network
+    
+  postgresql_database:
+    image: postgres:16
+    container_name: postgresql_database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    networks:
+      - membresias-network
+    
 # PROMOCIONES
   api_promociones:
     build:
@@ -16,21 +49,19 @@ services:
       - ./api-promociones:/app
       - /app/node_modules
     environment:
-      - MONGO_URI=mongodb://my_mongo_database/promociones_db
+      - MONGO_URI=mongodb://mongo_database/promociones_db
     depends_on:
-      - my_mongo_database
+      - mongo_database
     networks:
       - promociones-network
 
-  my_mongo_database:
+  mongo_database:
     image: mongo
-    container_name: my_mongo_database
+    container_name: mongo_database
     ports:
       - "27017:27017"
     volumes:
       - ./api-promociones/init.js:/docker-entrypoint-initdb.d/init.js
-    logging:
-      driver: none
     networks:
       - promociones-network
     # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
@@ -69,8 +100,6 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     #   - ./api-clientes/init.sql:/docker-entrypoint-initdb.d/init.sql
-    logging:
-      driver: none
     networks:
       - clientes-network
     
@@ -82,9 +111,12 @@ services:
 
 volumes:
   mysql_data:
+  postgresql_data:
 
 networks:
   promociones-network:
     driver: bridge
   clientes-network:
+    driver: bridge
+  membresias-network:
     driver: bridge
