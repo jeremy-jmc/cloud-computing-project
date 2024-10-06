@@ -35,27 +35,10 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=postgres
-    depends_on:
-      - postgresql_database
     networks:
-      - membresias-network
       - api-network
-    
-  postgresql_database:
-    image: postgres:16
-    container_name: postgresql_database
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    volumes:
-      - postgresql_data:/var/lib/postgresql/data
-      - ./api-membresias/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - membresias-network
-    
+
+
 # PROMOCIONES
   api_promociones:
     build:
@@ -69,27 +52,9 @@ services:
       - /app/node_modules
     environment:
       - MONGO_URI=mongodb://mongo_database/promociones_db
-    depends_on:
-      - mongo_database
     networks:
-      - promociones-network
       - api-network
 
-  mongo_database:
-    image: mongo
-    container_name: mongo_database
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-      - ./api-promociones/init.js:/docker-entrypoint-initdb.d/init.js
-    networks:
-      - promociones-network
-    # logging:
-    #   driver: "none"
-    # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
-    # mongosh --username admin --password 
-    # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
 
 # CLIENTES
   api_clientes:
@@ -107,26 +72,9 @@ services:
       - DB_HOST=mysql_database
       - DB_PORT=3306
       - DB_NAME=mysql
-    depends_on:
-      - mysql_database
     networks:
-      - clientes-network
       - api-network
 
-  mysql_database:
-    image: mysql:8.0
-    container_name: mysql_database
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: utec
-      # MYSQL_DATABASE: mysql
-    volumes:
-      - mysql_data:/var/lib/mysql
-    #   - ./api-clientes/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - clientes-network
-    
   # adminer_c:
   #   image: adminer
   #   container_name: adminer_c
@@ -139,11 +87,11 @@ volumes:
   mongodb_data:
 
 networks:
-  promociones-network:
-    driver: bridge
-  clientes-network:
-    driver: bridge
-  membresias-network:
-    driver: bridge
+  # promociones-network:
+  #   driver: bridge
+  # clientes-network:
+  #   driver: bridge
+  # membresias-network:
+  #   driver: bridge
   api-network:
     driver: bridge
