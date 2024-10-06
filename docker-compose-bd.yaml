@@ -1,0 +1,46 @@
+version: '3'
+# docker compose logs -f api_membresias api_promociones api_clientes api_orquestador
+services:    
+  postgresql_database:
+    image: postgres:16
+    container_name: postgresql_database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - ./api-membresias/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  mongo_database:
+    image: mongo
+    container_name: mongo_database
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./api-promociones/init.js:/docker-entrypoint-initdb.d/init.js
+    # logging:
+    #   driver: "none"
+    # https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
+    # mongosh --username admin --password 
+    # command: bash -c 'sleep 30 && mongosh --username admin --password password < /docker-entrypoint-initdb.d/init.js'
+
+  mysql_database:
+    image: mysql:8.0
+    container_name: mysql_database
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: utec
+      # MYSQL_DATABASE: mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    #   - ./api-clientes/init.sql:/docker-entrypoint-initdb.d/init.sql
+  
+volumes:
+  mysql_data:
+  postgresql_data:
+  mongodb_data:

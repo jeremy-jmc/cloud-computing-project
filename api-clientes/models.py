@@ -58,7 +58,10 @@ def insert_dummy_data():
     session.commit()
     session.close()
 
-insert_dummy_data()
+try:
+    insert_dummy_data()
+except:
+    pass
 
 class ClienteModel(BaseModel):
     dni: str
