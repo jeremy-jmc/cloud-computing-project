@@ -56,7 +56,7 @@ if (db.campanias.countDocuments() === 0) {
       nombre: "Campaña de Invierno",
       descripcion: "Descuentos generales para todos los usuarios",
       fecha_inicio: new Date("2024-07-01"),
-      fecha_fin: new Date("2024-09-30")
+      fecha_fin: new Date("2024-12-31")
     },
     {
       campania_id: 2,

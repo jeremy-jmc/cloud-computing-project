@@ -41,18 +41,21 @@ const Campania = mongoose.model('campanias', campaniaSchema);
 app.get('/', (req, res) => {
   res.json({ message: 'API Promociones is alive' });
 });
-
 // Obtener las promociones de campaña
 app.get('/promociones', async (req, res) => {
   try {
-    const campania = await Campania.find().lean();
+    const currentDate = new Date();
+    console.log(currentDate);
+    const campania = await Campania.find({
+      fecha_inicio: { $lte: currentDate },
+      fecha_fin: { $gte: currentDate }
+    }).lean();
     res.json(campania);
   } catch (error) {
     console.error(`Error: ${error.message}`);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 // Obtener las promociones exclusivas por DNI
 app.get('/promociones_exclusivas/:dni', async (req, res) => {

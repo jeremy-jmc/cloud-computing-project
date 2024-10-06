@@ -36,7 +36,11 @@ def verificar_membresia(dni_cliente: str):
 
     if status == 404:
         # Si está caducada, la UI procede a solicitar las promociones.
-        return requests.get(f"{API_PROMOCIONES}/promociones").json()
+        return {
+            "status": "404",
+            "message": "Cliente no encontrado",
+            "promociones": requests.get(f"{API_PROMOCIONES}/promociones").json()
+        }
     elif status == 200:
         # Si la membresía está activa, responde a la UI con un mensaje de confirmación.
         return response
@@ -46,6 +50,13 @@ def verificar_membresia(dni_cliente: str):
             "message": "No se ha podido procesar la solicitud",
             "data": None
         }
+
+
+# @app.post("/renovar_membresia")
+# def renovar_membresia(dni_cliente: str):
+#     print(f"Renovando membresia de {dni_cliente}")
+#     response = requests.post(f"{API_MEMBRESIAS}/renovar_membresia/{dni_cliente}")
+#     return response.json()
 
 """
 INSERT INTO mysql.cliente_real VALUES 
