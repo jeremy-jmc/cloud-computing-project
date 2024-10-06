@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: api-orquestador-fastapi
     ports:
-      - "8000:8000"
+      - "5000:8000"
     volumes:
       - ./api-orquestador:/app
     depends_on:
@@ -26,7 +26,7 @@ services:
       dockerfile: Dockerfile
     container_name: api-membresias-golang
     ports:
-      - "8002:8002"
+      - "5002:8002"
     volumes:
       - ./api-membresias:/app
     environment:
@@ -63,7 +63,7 @@ services:
       dockerfile: Dockerfile
     container_name: api-promociones-nodejs
     ports:
-      - "8003:8003"
+      - "5003:8003"
     volumes:
       - ./api-promociones:/app
       - /app/node_modules
@@ -98,7 +98,7 @@ services:
       dockerfile: Dockerfile
     container_name: api-clientes-fastapi
     ports:
-      - "8001:8001"
+      - "5001:8001"
     volumes:
       - ./api-clientes:/app
     environment:

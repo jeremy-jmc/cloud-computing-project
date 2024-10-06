@@ -7,19 +7,19 @@ app = FastAPI()
 
 @app.get("/api_clientes/")
 def api_clientes():
-    response = requests.get("http://api-clientes-fastapi:8001/")
+    response = requests.get("http://api-clientes-fastapi:5001/")
     return response.json()
 
 
 @app.get("/api_membresias/")
 def api_membresias():
-    response = requests.get("http://api-membresias-golang:8002/")
+    response = requests.get("http://api-membresias-golang:5002/")
     return response.json()
 
 
 @app.get("/api_promociones/")
 def api_promociones():
-    response = requests.get("http://api-promociones-nodejs:8003/")
+    response = requests.get("http://api-promociones-nodejs:5003/")
     return response.json()
 
 
