@@ -28,6 +28,7 @@ class ClienteInvitado(Base):
     apellido = Column(String(50), nullable=False)
     email = Column(String(50), nullable=False)    
     fecha_invitacion = Column(DateTime, default=datetime.now())
+    referido_por = Column(String(50), nullable=True)
 
     
 
@@ -44,7 +45,12 @@ class ClienteModel(BaseModel):
     apellido: str
     email: str
 
-
+class ClienteInvitadoModel(BaseModel):
+    dni: str
+    nombre: str
+    apellido: str
+    email: str
+    referido_por: str
 
 
 # Truncate tables
