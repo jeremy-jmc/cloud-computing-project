@@ -1,2 +1,1 @@
-cd /home/ubuntu/cloud-computing-project/
-docker compose up --build
+docker compose -f /home/ubuntu/cloud-computing-project/docker-compose.yaml up --build
