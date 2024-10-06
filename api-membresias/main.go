@@ -13,12 +13,21 @@ import (
 )
 
 type Membresia struct {
-    ID          int    `json:"id"`
-    Tipo        string `json:"tipo"`
-    FechaInicio string `json:"fecha_inicio"`
-    FechaFin    string `json:"fecha_fin"`
-    Estado      string `json:"estado"`
-    ClienteID   int    `json:"cliente_id"`
+    cliente_id          int    `json:"cliente_id"`
+    dni                 string `json:"dni"`
+    promo_id            int    `json:"promo_id"`
+    fecha_inicio        string `json:"fecha_inicio"`
+    fecha_fin           string `json:"fecha_fin"`
+    estado              string `json:"estado"`
+}
+
+type Pago struct {
+    pago_id             int    `json:"pago_id"`
+    promo_id            int    `json:"promo_id"`
+    cliente_id          int    `json:"cliente_id"`
+    fecha_pago          string `json:"fecha_pago"`
+    monto               float64 `json:"monto"`
+    metodo_pago         string `json:"metodo_pago"`
 }
 
 type Cliente struct {
@@ -84,8 +93,8 @@ func main() {
     }).Methods("GET")
 
     router.HandleFunc("/membresias/{dni}", getMembresia).Methods("GET")
-    router.HandleFunc("/membresias/{dni}", createOrRenewMembresia).Methods("POST")
-    router.HandleFunc("/membresias/{dni}", updateMembresia).Methods("PUT")
+    router.HandleFunc("/membresias/", createOrRenewMembresia).Methods("POST")
+    router.HandleFunc("/membresias/", updateMembresia).Methods("PUT")
 
     fmt.Println("Servidor corriendo en el puerto 8002")
     log.Fatal(http.ListenAndServe(":8002", router))
@@ -93,24 +102,32 @@ func main() {
 
 func initializeDB() {
     _, err := db.Exec(`
-        CREATE TABLE IF NOT EXISTS clientes (
-            id SERIAL PRIMARY KEY,
-            dni VARCHAR(20) UNIQUE NOT NULL,
-            nombre VARCHAR(100)
+        CREATE TABLE IF NOT EXISTS membresia_cliente (
+            cliente_id SERIAL PRIMARY KEY,
+            dni VARCHAR(20),
+            promo_id INTEGER,
+            fecha_inicio DATE,
+            fecha_fin DATE,
+            estado VARCHAR(20)
         );
-        CREATE TABLE IF NOT EXISTS membresias (
+
+        CREATE TABLE IF NOT EXISTS membresia_historial (
             id SERIAL PRIMARY KEY,
             tipo VARCHAR(50),
             fecha_inicio DATE,
             fecha_fin DATE,
             estado VARCHAR(20),
-            cliente_id INTEGER REFERENCES clientes(id)
+            cliente_id INTEGER REFERENCES membresia_cliente(cliente_id),
+            promo_id INTEGER
         );
-        CREATE TABLE IF NOT EXISTS pagos (
-            id SERIAL PRIMARY KEY,
-            fecha DATE,
-            monto DECIMAL(10, 2),
-            membresia_id INTEGER REFERENCES membresias(id)
+
+        CREATE TABLE IF NOT EXISTS membresia_pagos (
+            pago_id SERIAL PRIMARY KEY,
+            promo_id INTEGER,
+            cliente_id INTEGER REFERENCES membresia_cliente(cliente_id),
+            fecha_pago DATE,
+            monto DECIMAL(10,2),
+            metodo_pago VARCHAR(20)
         );
     `)
     if err != nil {
@@ -125,13 +142,12 @@ func getMembresia(w http.ResponseWriter, r *http.Request) {
     var membresia Membresia
 
     err := db.QueryRow(`
-        SELECT m.id, m.tipo, m.fecha_inicio, m.fecha_fin, m.estado, m.cliente_id
-        FROM membresias m
-        JOIN clientes c ON m.cliente_id = c.id
-        WHERE c.dni = $1
+        SELECT m.cliente_id, m.dni, m.promo_id, m.fecha_inicio, m.fecha_fin, m.estado
+        FROM membresia_cliente m
+        WHERE m.dni = $1
         ORDER BY m.fecha_fin DESC
         LIMIT 1
-    `, dni).Scan(&membresia.ID, &membresia.Tipo, &membresia.FechaInicio, &membresia.FechaFin, &membresia.Estado, &membresia.ClienteID)
+    `, dni).Scan(&membresia.cliente_id, &membresia.dni, &membresia.promo_id, &membresia.fecha_inicio, &membresia.fecha_fin, &membresia.estado)
 
     if err == sql.ErrNoRows {
         http.Error(w, "Membresía no encontrada", http.StatusNotFound)
@@ -145,59 +161,148 @@ func getMembresia(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(membresia)
 }
 
-func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
+
+func getClientePagos(w http.ResponseWriter, r *http.Request) {
+
     vars := mux.Vars(r)
     dni := vars["dni"]
+
+    var pagos []Pago
+
+    rows, err := db.Query(`
+        SELECT p.pago_id, p.promo_id, p.cliente_id, p.fecha_pago, p.monto, p.metodo_pago
+        FROM membresia_pagos p
+        JOIN membresia_cliente m ON p.cliente_id = m.cliente_id
+        WHERE m.dni = $1
+        ORDER BY p.fecha_pago DESC
+    `, dni)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    for rows.Next() {
+        var pago Pago
+        err := rows.Scan(&pago.pago_id, &pago.promo_id, &pago.cliente_id, &pago.fecha_pago, &pago.monto, &pago.metodo_pago)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        pagos = append(pagos, pago)
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(pagos)
+}
+
+
+
+
+
+
+func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
 
 	// // print w and r
 	// fmt.Println(w)
 	// fmt.Println(r)
-
-    var input struct {
-        Tipo      string `json:"tipo"`
-        ClienteID int    `json:"cliente_id"`
+    type Input struct {
+        promoID   int    `json:"promo_id"`
+        dni       string `json:"dni"`
+        monto    float64 `json:"monto"`
+        metodoPago string `json:"metodo_pago"`
     }
+    var input Input
 
     err := json.NewDecoder(r.Body).Decode(&input)
+    body, _ := json.Marshal(input)
+    fmt.Println("body: ", string(body))
+    
+
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
 
+    //print 
+    fmt.Println("promoID: ", input.promoID)
+    fmt.Println("dni: ", input.dni)
+    fmt.Println("monto: ", input.monto)
+    fmt.Println("metodoPago: ", input.metodoPago)
+    
+
     var clienteID int
-    err = db.QueryRow("SELECT id FROM clientes WHERE dni = $1", dni).Scan(&clienteID)
+    var fechaFin string
+    err = db.QueryRow("SELECT cliente_id, fecha_fin FROM membresia_cliente WHERE dni = $1", input.dni).Scan(&clienteID, &fechaFin)
+
+    // Si el cliente no existe, se crea una nueva membresía
     if err == sql.ErrNoRows {
-        err = db.QueryRow("INSERT INTO clientes (dni) VALUES ($1) RETURNING id", dni).Scan(&clienteID)
+        // print 
+        fmt.Println("No se encontró el cliente")
+
+
+        err = db.QueryRow(`
+        INSERT INTO membresia_cliente (promo_id, dni, fecha_inicio, fecha_fin, estado)
+        VALUES ($1, $2, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 month', 'activa') RETURNING cliente_id
+        `, input.promoID,  input.dni).Scan(&clienteID)
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
+        fmt.Println("cliente_id: ", clienteID)
+
+        _, err = db.Exec(`
+            INSERT INTO membresia_pagos (promo_id, cliente_id, fecha_pago, monto, metodo_pago)
+            VALUES ($1, $2, CURRENT_DATE, $3, $4)
+        `, input.promoID, clienteID, input.monto, input.metodoPago)
+
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+
+        
+
+        
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("Membresía creada exitosamente"))
+        return
     } else if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
+    // Si el cliente existe, se crea una nueva membresía
+
+    err = db.QueryRow(`
+        INSERT INTO membresia_cliente (dni, promo_id,fecha_inicio, fecha_fin, estado )
+        VALUES ($1, $2, $3, $3 + INTERVAL '1 month', 'activa') RETURNING cliente_id
+    `,  input.dni, input.promoID, fechaFin ).Scan(&clienteID)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
     _, err = db.Exec(`
-        INSERT INTO membresias (tipo, fecha_inicio, fecha_fin, estado, cliente_id)
-        VALUES ($1, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 month', 'activa', $2)
-    `, input.Tipo, clienteID)
+        INSERT INTO membresia_pagos (promo_id, cliente_id, fecha_pago, monto, metodo_pago)
+        VALUES ($1, $2, CURRENT_DATE, $3, $4)
+    `, input.promoID, clienteID, input.monto, input.metodoPago)
+
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
     w.WriteHeader(http.StatusOK)
-    w.Write([]byte("Membresía creada o renovada exitosamente"))
+    w.Write([]byte("Membresía renovada exitosamente"))
 }
 
 func updateMembresia(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    dni := vars["dni"]
 
     var input struct {
-        Tipo        string `json:"tipo"`
-        FechaInicio string `json:"fecha_inicio"`
-        FechaFin    string `json:"fecha_fin"`
+        cliente_id  int    `json:"cliente_id"`        
+        dni        string `json:"dni"`
+        estado        string `json:"estado"`                
     }
 
     err := json.NewDecoder(r.Body).Decode(&input)
@@ -206,21 +311,13 @@ func updateMembresia(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var clienteID int
-    err = db.QueryRow("SELECT id FROM clientes WHERE dni = $1", dni).Scan(&clienteID)
-    if err == sql.ErrNoRows {
-        http.Error(w, "Cliente no encontrado", http.StatusNotFound)
-        return
-    } else if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+    
 
     _, err = db.Exec(`
-        UPDATE membresias
-        SET tipo = $1, fecha_inicio = $2, fecha_fin = $3
-        WHERE cliente_id = $4
-    `, input.Tipo, input.FechaInicio, input.FechaFin, clienteID)
+        UPDATE membresia_cliente
+        SET estado = $1
+        WHERE cliente_id = $2 AND dni = $3
+    `, input.estado,  input.cliente_id, input.dni)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
