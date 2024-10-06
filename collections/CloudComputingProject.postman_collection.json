@@ -1,0 +1,129 @@
+{
+	"info": {
+		"_postman_id": "1559f449-0e69-4693-8561-bca698c674a3",
+		"name": "CloudComputingProject",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19056600"
+	},
+	"item": [
+		{
+			"name": "OrquestadorAlive",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_orquestador}}",
+					"host": [
+						"{{api_orquestador}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OrquestadorVerificarMembresia",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_orquestador}}/verificar_membresia/77777777/",
+					"host": [
+						"{{api_orquestador}}"
+					],
+					"path": [
+						"verificar_membresia",
+						"77777777",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OrquestadorRenovarMembresia",
+			"request": {
+				"method": "POST",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "PromocionesGetCampaña",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_promociones}}/promociones/",
+					"host": [
+						"{{api_promociones}}"
+					],
+					"path": [
+						"promociones",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PromocionesExclusivas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_promociones}}/promociones_exclusivas/77777777",
+					"host": [
+						"{{api_promociones}}"
+					],
+					"path": [
+						"promociones_exclusivas",
+						"77777777"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api_orquestador",
+			"value": "localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "api_clientes",
+			"value": "localhost:8001",
+			"type": "string"
+		},
+		{
+			"key": "api_membresias",
+			"value": "localhost:8002",
+			"type": "string"
+		},
+		{
+			"key": "api_promociones",
+			"value": "localhost:8003",
+			"type": "string"
+		}
+	]
+}
