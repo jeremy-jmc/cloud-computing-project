@@ -82,7 +82,7 @@ func main() {
         w.WriteHeader(http.StatusOK)
         json.NewEncoder(w).Encode(response)
     }).Methods("GET")
-    
+
     router.HandleFunc("/membresias/{dni}", getMembresia).Methods("GET")
     router.HandleFunc("/membresias/{dni}", createOrRenewMembresia).Methods("POST")
     router.HandleFunc("/membresias/{dni}", updateMembresia).Methods("PUT")
@@ -105,6 +105,12 @@ func initializeDB() {
             fecha_fin DATE,
             estado VARCHAR(20),
             cliente_id INTEGER REFERENCES clientes(id)
+        );
+        CREATE TABLE IF NOT EXISTS pagos (
+            id SERIAL PRIMARY KEY,
+            fecha DATE,
+            monto DECIMAL(10, 2),
+            membresia_id INTEGER REFERENCES membresias(id)
         );
     `)
     if err != nil {
