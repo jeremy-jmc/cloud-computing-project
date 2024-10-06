@@ -94,6 +94,7 @@ func main() {
     }).Methods("GET")
 
     router.HandleFunc("/membresias/{dni}", getMembresia).Methods("GET")
+    router.HandleFunc("/pagos/{dni}", getClientePagos).Methods("GET")
     router.HandleFunc("/membresias/", createOrRenewMembresia).Methods("POST")
     router.HandleFunc("/membresias/", updateMembresia).Methods("PUT")
     router.HandleFunc("/cancelar-membresia/{dni}", cancelarMembresia).Methods("PUT")
@@ -154,8 +155,6 @@ func getMembresia(w http.ResponseWriter, r *http.Request) {
         ORDER BY m.fecha_fin DESC
         LIMIT 1
     `, dni).Scan(&membresia.cliente_id, &membresia.dni, &membresia.promo_id, &membresia.fecha_inicio, &membresia.fecha_fin, &membresia.estado)
-
-    fmt.Printf("membresia: %+v\n", membresia)
     
     if err == sql.ErrNoRows {
         http.Error(w, "Membresía no encontrada", http.StatusNotFound)
@@ -164,7 +163,7 @@ func getMembresia(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-
+    
     response := struct {
         ClienteID   int    `json:"cliente_id"`
         DNI         string `json:"dni"`
@@ -191,7 +190,16 @@ func getClientePagos(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     dni := vars["dni"]
 
-    var pagos []Pago
+    type Output struct {
+        PagoID      int     `json:"pago_id"`
+        PromoID     int     `json:"promo_id"`
+        ClienteID   int     `json:"cliente_id"`
+        FechaPago   string  `json:"fecha_pago"`
+        Monto       float64 `json:"monto"`
+        MetodoPago  string  `json:"metodo_pago"`
+    }
+
+    var pagos []Output
 
     rows, err := db.Query(`
         SELECT p.pago_id, p.promo_id, p.cliente_id, p.fecha_pago, p.Monto, p.metodo_pago
@@ -207,17 +215,30 @@ func getClientePagos(w http.ResponseWriter, r *http.Request) {
     defer rows.Close()
 
     for rows.Next() {
-        var pago Pago
-        err := rows.Scan(&pago.pago_id, &pago.promo_id, &pago.cliente_id, &pago.fecha_pago, &pago.monto, &pago.metodo_pago)
+        var pago Output
+        
+        err := rows.Scan(&pago.PagoID, &pago.PromoID, &pago.ClienteID, &pago.FechaPago, &pago.Monto, &pago.MetodoPago)
+        
+
+
+
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
         pagos = append(pagos, pago)
     }
+    
 
+
+    
+    
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(pagos)
+    err = json.NewEncoder(w).Encode(pagos)
+    if  err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 }
 
 
