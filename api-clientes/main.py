@@ -88,7 +88,7 @@ def update_cliente( cliente: ClienteModel, db: Session = Depends(get_db)):
     if db_cliente is None:
         return {
             "status": "404",
-            "message": "Cliente no encontrado",
+            "message": "Cliente no encontrado. No se puede actualizar los datos",
             "data": None
         }
     db_cliente.nombre = cliente.nombre
