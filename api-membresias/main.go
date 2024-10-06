@@ -293,7 +293,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
     err = db.QueryRow(`
         INSERT INTO membresia_cliente (dni, promo_id,fecha_inicio, fecha_fin, estado )
         VALUES ($1, $2, $3, $4, 'activa') RETURNING cliente_id
-    `,  input.dni, input.promoID, parse_fechaInit, parse_fechaFin ).Scan(&clienteID)
+    `,  input.DNI, input.PromoID, parse_fechaInit, parse_fechaFin ).Scan(&clienteID)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
