@@ -141,6 +141,8 @@ func getMembresia(w http.ResponseWriter, r *http.Request) {
 
     var membresia Membresia
 
+    fmt.Printf("dni: %T \"%s\"\n", dni, dni)
+
     err := db.QueryRow(`
         SELECT m.cliente_id, m.dni, m.promo_id, m.fecha_inicio, m.fecha_fin, m.estado
         FROM membresia_cliente m
@@ -149,6 +151,8 @@ func getMembresia(w http.ResponseWriter, r *http.Request) {
         LIMIT 1
     `, dni).Scan(&membresia.cliente_id, &membresia.dni, &membresia.promo_id, &membresia.fecha_inicio, &membresia.fecha_fin, &membresia.estado)
 
+    fmt.Printf("membresia: %+v\n", membresia)
+    
     if err == sql.ErrNoRows {
         http.Error(w, "Membresía no encontrada", http.StatusNotFound)
         return
@@ -157,8 +161,24 @@ func getMembresia(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    response := struct {
+        ClienteID   int    `json:"cliente_id"`
+        DNI         string `json:"dni"`
+        PromoID     int    `json:"promo_id"`
+        FechaInicio string `json:"fecha_inicio"`
+        FechaFin    string `json:"fecha_fin"`
+        Estado      string `json:"estado"`
+    }{
+        ClienteID:   membresia.cliente_id,
+        DNI:         membresia.dni,
+        PromoID:     membresia.promo_id,
+        FechaInicio: membresia.fecha_inicio,
+        FechaFin:    membresia.fecha_fin,
+        Estado:      membresia.estado,
+    }
+
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(membresia)
+    json.NewEncoder(w).Encode(response)
 }
 
 
@@ -170,10 +190,10 @@ func getClientePagos(w http.ResponseWriter, r *http.Request) {
     var pagos []Pago
 
     rows, err := db.Query(`
-        SELECT p.pago_id, p.promo_id, p.cliente_id, p.fecha_pago, p.monto, p.metodo_pago
+        SELECT p.pago_id, p.promo_id, p.cliente_id, p.fecha_pago, p.Monto, p.metodo_pago
         FROM membresia_pagos p
         JOIN membresia_cliente m ON p.cliente_id = m.cliente_id
-        WHERE m.dni = $1
+        WHERE m.DNI = $1
         ORDER BY p.fecha_pago DESC
     `, dni)
     if err != nil {
@@ -200,40 +220,33 @@ func getClientePagos(w http.ResponseWriter, r *http.Request) {
 
 
 
-
 func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
-
-	// // print w and r
-	// fmt.Println(w)
-	// fmt.Println(r)
     type Input struct {
-        promoID   int    `json:"promo_id"`
-        dni       string `json:"dni"`
-        monto    float64 `json:"monto"`
-        metodoPago string `json:"metodo_pago"`
+        PromoID    int     `json:"promo_id"`
+        DNI        string  `json:"dni"`
+        Monto      float64 `json:"monto"`
+        MetodoPago string  `json:"metodo_pago"`
     }
     var input Input
 
     err := json.NewDecoder(r.Body).Decode(&input)
-    body, _ := json.Marshal(input)
-    fmt.Println("body: ", string(body))
-    
-
     if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
+        http.Error(w, "Error parsing JSON: "+err.Error(), http.StatusBadRequest)
         return
     }
 
+    // Log para verificar el contenido recibido
+    fmt.Printf("Received: %+v\n", input)
     //print 
-    fmt.Println("promoID: ", input.promoID)
-    fmt.Println("dni: ", input.dni)
-    fmt.Println("monto: ", input.monto)
-    fmt.Println("metodoPago: ", input.metodoPago)
+    fmt.Println("promoID: ", input.PromoID)
+    fmt.Println("dni: ", input.DNI)
+    fmt.Println("monto: ", input.Monto)
+    fmt.Println("metodoPago: ", input.MetodoPago)
     
 
     var clienteID int
     var fechaFin string
-    err = db.QueryRow("SELECT cliente_id, fecha_fin FROM membresia_cliente WHERE dni = $1", input.dni).Scan(&clienteID, &fechaFin)
+    err = db.QueryRow("SELECT cliente_id, fecha_fin FROM membresia_cliente WHERE dni = $1", input.DNI).Scan(&clienteID, &fechaFin)
 
     // Si el cliente no existe, se crea una nueva membresía
     if err == sql.ErrNoRows {
@@ -244,7 +257,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
         err = db.QueryRow(`
         INSERT INTO membresia_cliente (promo_id, dni, fecha_inicio, fecha_fin, estado)
         VALUES ($1, $2, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 month', 'activa') RETURNING cliente_id
-        `, input.promoID,  input.dni).Scan(&clienteID)
+        `, input.PromoID,  input.DNI).Scan(&clienteID)
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
@@ -254,7 +267,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
         _, err = db.Exec(`
             INSERT INTO membresia_pagos (promo_id, cliente_id, fecha_pago, monto, metodo_pago)
             VALUES ($1, $2, CURRENT_DATE, $3, $4)
-        `, input.promoID, clienteID, input.monto, input.metodoPago)
+        `, input.PromoID, clienteID, input.Monto, input.MetodoPago)
 
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -277,7 +290,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
     err = db.QueryRow(`
         INSERT INTO membresia_cliente (dni, promo_id,fecha_inicio, fecha_fin, estado )
         VALUES ($1, $2, $3, $3 + INTERVAL '1 month', 'activa') RETURNING cliente_id
-    `,  input.dni, input.promoID, fechaFin ).Scan(&clienteID)
+    `,  input.DNI, input.PromoID, fechaFin ).Scan(&clienteID)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -286,7 +299,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
     _, err = db.Exec(`
         INSERT INTO membresia_pagos (promo_id, cliente_id, fecha_pago, monto, metodo_pago)
         VALUES ($1, $2, CURRENT_DATE, $3, $4)
-    `, input.promoID, clienteID, input.monto, input.metodoPago)
+    `, input.PromoID, clienteID, input.Monto, input.MetodoPago)
 
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
