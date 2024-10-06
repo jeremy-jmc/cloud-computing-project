@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+    "time"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -271,17 +272,21 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-
     // Si el cliente existe, se crea una nueva membresía
+    parse_fechaInit, _ := time.Parse("2006-01-02T15:04:05", fechaFin)
+    parse_fechaFin := parse_fechaInit.AddDate(0, 1, 0)
+
 
     err = db.QueryRow(`
         INSERT INTO membresia_cliente (dni, promo_id,fecha_inicio, fecha_fin, estado )
-        VALUES ($1, $2, $3, $3 + INTERVAL '1 month', 'activa') RETURNING cliente_id
-    `,  input.dni, input.promoID, fechaFin ).Scan(&clienteID)
+        VALUES ($1, $2, $3, $4, 'activa') RETURNING cliente_id
+    `,  input.dni, input.promoID, parse_fechaInit, parse_fechaFin ).Scan(&clienteID)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
+    // print
+    fmt.Println("cliente_id: ", clienteID)
 
     _, err = db.Exec(`
         INSERT INTO membresia_pagos (promo_id, cliente_id, fecha_pago, monto, metodo_pago)
