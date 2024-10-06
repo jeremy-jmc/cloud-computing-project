@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
-from models import Cliente, ClienteModel, ClienteReal, ClienteInvitado, ClienteInvitadoModel, truncate_table
+from models import Cliente, ClienteModel, ClienteInvitado,  truncate_table
 
 app = FastAPI()
 
@@ -11,16 +11,10 @@ def is_alive():
 
 
 # ------------------- Leer clientes -------------------
-@app.get("/clientes/")
-def read_clientes(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    db_clientes = db.query(Cliente).offset(skip).limit(limit).all()
-    return {
-        "status": "200",
-        "message": "Clientes encontrados",
-        "data": db_clientes
-    }
+
+
 @app.get("/clientes/invitado/")
-def read_clientes_invitados(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_clientes_invitados_all(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     db_clientes = db.query(ClienteInvitado).offset(skip).limit(limit).all()
     return {
         "status": "200",
@@ -29,8 +23,8 @@ def read_clientes_invitados(skip: int = 0, limit: int = 10, db: Session = Depend
     }
 
 @app.get("/clientes/real/")
-def read_clientes_reales(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    db_clientes = db.query(ClienteReal).offset(skip).limit(limit).all()
+def read_clientes_reales_all(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    db_clientes = db.query(Cliente).offset(skip).limit(limit).all()
     return {
         "status": "200",
         "message": "Clientes reales encontrados",
@@ -41,30 +35,11 @@ def read_clientes_reales(skip: int = 0, limit: int = 10, db: Session = Depends(g
 
 # ------------------- Crear cliente -------------------
 # Recibe el cliente por DNI
-@app.get("/clientes/{dni}")
-def read_cliente(dni: str, db : Session = Depends(get_db)):
-    db_cliente = db.query(Cliente).filter(Cliente.dni == dni).first()
-    if db_cliente is None:
-        return {
-            "status": "404",
-            "message": "Cliente no encontrado",
-            "data": None
-        }
-        
-    return {
-        "status": "200",
-        "message": "Cliente encontrado",
-        "data": {
-            "dni": db_cliente.dni,
-            "nombre": db_cliente.nombre,
-            "apellido": db_cliente.apellido, 
-            "email": db_cliente.email,
-        }
-    }
+
 
 @app.get("/clientes/real/{dni}")
 def read_cliente_real(dni: str, db : Session = Depends(get_db)):
-    db_cliente = db.query(ClienteReal).filter(ClienteReal.dni == dni).first()
+    db_cliente = db.query(Cliente).filter(Cliente.dni == dni).first()
     if db_cliente is None:
         return {
             "status": "404",
@@ -133,7 +108,7 @@ def update_cliente(dni: str, cliente: ClienteModel, db: Session = Depends(get_db
 
 @app.put("/clientes/{dni}")
 def delete_cliente(dni: str, db: Session = Depends(get_db)):
-    db_cliente = db.query(ClienteReal).filter(ClienteReal.dni == dni).first()
+    db_cliente = db.query(Cliente).filter(Cliente.dni == dni).first()
     if db_cliente is None:
         return {
             "status": "404",
@@ -161,13 +136,11 @@ def delete_cliente(dni: str, db: Session = Depends(get_db)):
 
 
 # ------------------- Crear cliente -------------------
-
-def create_cliente(cliente: ClienteModel, db: Session):
+@app.post("/clientes/real/")
+def create_cliente(cliente: ClienteModel, db: Session = Depends(get_db)):
     db_cliente = Cliente(dni=cliente.dni, nombre=cliente.nombre, apellido=cliente.apellido, email=cliente.email)
 
-    print("db_cliente", db_cliente)
-
-    if db.query(Cliente).filter(Cliente.dni == db_cliente.dni).first() :
+    if db.query(Cliente).filter(Cliente.dni == db_cliente.dni).first() is not None:
         return {
             "status": "400",
             "message": "El cliente ya existe",
@@ -186,6 +159,10 @@ def create_cliente(cliente: ClienteModel, db: Session):
             "data": None
         }
     
+    print(db_cliente)
+        
+    
+    
     db.add(db_cliente)
     db.commit()
     db.refresh(db_cliente)
@@ -202,36 +179,55 @@ def create_cliente(cliente: ClienteModel, db: Session):
     }
 
 
-@app.post("/clientes/real/")
-def create_cliente_real(cliente: ClienteModel, db: Session = Depends(get_db)):
-    response = create_cliente(cliente, db)
-    if response["status"] != "200":
-        return response
-            
-    db_cliente_real = ClienteReal(dni=response["data"]["dni"], activo=True)
 
-    db.add(db_cliente_real)
-    db.commit()
-    db.refresh(db_cliente_real)
-    return response
 
 @app.post("/clientes/invitado/")
-def create_cliente_invitado(cliente: ClienteInvitadoModel, db: Session = Depends(get_db)):
+def create_cliente_invitado(cliente: ClienteModel, db: Session = Depends(get_db)):
     
-    ClienteM = ClienteModel(dni=cliente.dni, nombre=cliente.nombre, apellido=cliente.apellido, email=cliente.email)
-    print("ClienteM", ClienteM)
-    response = create_cliente(ClienteM, db)
+        
+    db_cliente_inv = ClienteInvitado(dni=cliente.dni, nombre=cliente.nombre, apellido=cliente.apellido, email=cliente.email)
+    
+
+    if  db.query(Cliente).filter(Cliente.dni == db_cliente_inv.dni).first() is not None:
+        return {
+            "status": "404",
+            "message": "Cliente con membresia",
+            "data": None
+        }
+    elif db.query(ClienteInvitado).filter(ClienteInvitado.dni == db_cliente_inv.dni).first() is not None:
+        return {
+            "status": "400",
+            "message": "El cliente ya existe",
+            "data": None
+        }
+    elif len(db_cliente_inv.dni) != 8:
+        return {
+            "status": "400",
+            "message": "El DNI debe tener 8 caracteres",
+            "data": None
+        }
+    elif not "@" in db_cliente_inv.email:
+        return {
+            "status": "400",
+            "message": "El email no es válido",
+            "data": None
+        }
 
 
-    if response["status"] != "200":
-        return response
-            
-    db_cliente_inv = ClienteInvitado(dni=response["data"]["dni"], referido_por=cliente.referido_por)
 
     db.add(db_cliente_inv)
     db.commit()
     db.refresh(db_cliente_inv)
-    return response
+    return {
+        "status": "200",
+        "message": "Cliente creado",
+        "data": {
+            "dni": db_cliente_inv.dni,
+            "nombre": db_cliente_inv.nombre,
+            "apellido": db_cliente_inv.apellido, 
+            "email": db_cliente_inv.email,
+        }
+    }
 
 # ------------------- Crear cliente -------------------
 
