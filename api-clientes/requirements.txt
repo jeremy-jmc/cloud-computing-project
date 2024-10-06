@@ -6,6 +6,7 @@ uvicorn
 python-dotenv
 pymysql
 cryptography
+datetime
 # mysqlclient
 # asyncmy
 # greenlet
