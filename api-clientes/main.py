@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
-from models import Cliente, ClienteModel, ClienteInvitado,  truncate_table
+from models import Cliente, ClienteModel, ClienteInvitado,  truncate_table, ClienteInvitadoModel
 
 app = FastAPI()
 
@@ -76,14 +76,15 @@ def read_cliente_invitado(dni: str, db : Session = Depends(get_db)):
             "nombre": db_cliente.nombre,
             "apellido": db_cliente.apellido, 
             "email": db_cliente.email,
+            "referido_por": db_cliente.referido_por
         }
     }
 
 
 
-@app.put("/clientes/{dni}")
-def update_cliente(dni: str, cliente: ClienteModel, db: Session = Depends(get_db)):
-    db_cliente = db.query(Cliente).filter(Cliente.dni == dni).first()
+@app.put("/clientes/")
+def update_cliente( cliente: ClienteModel, db: Session = Depends(get_db)):
+    db_cliente = db.query(Cliente).filter(Cliente.dni == cliente.dni).first()
     if db_cliente is None:
         return {
             "status": "404",
@@ -106,8 +107,9 @@ def update_cliente(dni: str, cliente: ClienteModel, db: Session = Depends(get_db
         }
     }
 
-@app.put("/clientes/{dni}")
+@app.post("/clientes/delete/{dni}")
 def delete_cliente(dni: str, db: Session = Depends(get_db)):
+    print(dni)
     db_cliente = db.query(Cliente).filter(Cliente.dni == dni).first()
     if db_cliente is None:
         return {
@@ -117,6 +119,7 @@ def delete_cliente(dni: str, db: Session = Depends(get_db)):
         }
     db_cliente.activo = False
     db.commit()
+    db.refresh(db_cliente)
     return {
         "status": "200",
         "message": "Cliente desactivado",
@@ -182,10 +185,11 @@ def create_cliente(cliente: ClienteModel, db: Session = Depends(get_db)):
 
 
 @app.post("/clientes/invitado/")
-def create_cliente_invitado(cliente: ClienteModel, db: Session = Depends(get_db)):
+def create_cliente_invitado(cliente: ClienteInvitadoModel, db: Session = Depends(get_db)):
     
         
-    db_cliente_inv = ClienteInvitado(dni=cliente.dni, nombre=cliente.nombre, apellido=cliente.apellido, email=cliente.email)
+    db_cliente_inv = ClienteInvitado(dni=cliente.dni, nombre=cliente.nombre, apellido=cliente.apellido, email=cliente.email,
+                                     referido_por=cliente.referido_por)
     
 
     if  db.query(Cliente).filter(Cliente.dni == db_cliente_inv.dni).first() is not None:
@@ -198,6 +202,12 @@ def create_cliente_invitado(cliente: ClienteModel, db: Session = Depends(get_db)
         return {
             "status": "400",
             "message": "El cliente ya existe",
+            "data": None
+        }
+    elif db.query(Cliente).filter(Cliente.dni == db_cliente_inv.referido_por).first() is None:
+        return {
+            "status": "400",
+            "message": "El referido no existe",
             "data": None
         }
     elif len(db_cliente_inv.dni) != 8:
