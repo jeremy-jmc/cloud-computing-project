@@ -31,7 +31,7 @@ services:
       - ./api-membresias:/app
     environment:
       - DB_HOST=54.85.74.153
-      - DB_PORT=5433
+      - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=postgres
@@ -51,7 +51,7 @@ services:
       - ./api-promociones:/app
       - /app/node_modules
     environment:
-      - MONGO_URI=mongodb://54.85.74.153:27018/promociones_db
+      - MONGO_URI=mongodb://54.85.74.153:27017/promociones_db
     networks:
       - api-network
 
@@ -70,7 +70,7 @@ services:
       - DB_USER=root
       - DB_PASSWORD=utec
       - DB_HOST=54.85.74.153
-      - DB_PORT=3307
+      - DB_PORT=3306
       - DB_NAME=mysql
     networks:
       - api-network
