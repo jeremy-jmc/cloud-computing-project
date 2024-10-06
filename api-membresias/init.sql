@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS membresia_cliente (
 INSERT INTO membresia_cliente (dni, promo_id, fecha_inicio, fecha_fin, estado)
 VALUES ('77777777', 1, '2024-07-01', '2024-11-30', 'ACTIVO');
 
+INSERT INTO membresia_cliente (dni, promo_id, fecha_inicio, fecha_fin, estado)
+VALUES ('99999999', 1, '2024-09-01', '2024-12-31', 'ACTIVO');
+
 CREATE TABLE IF NOT EXISTS membresia_historial (
     id SERIAL PRIMARY KEY,
     tipo VARCHAR(50),

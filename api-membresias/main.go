@@ -95,10 +95,12 @@ func main() {
     router.HandleFunc("/membresias/{dni}", getMembresia).Methods("GET")
     router.HandleFunc("/membresias/", createOrRenewMembresia).Methods("POST")
     router.HandleFunc("/membresias/", updateMembresia).Methods("PUT")
+    router.HandleFunc("/cancelar-membresia/{dni}", cancelarMembresia).Methods("PUT")
 
     fmt.Println("Servidor corriendo en el puerto 8002")
     log.Fatal(http.ListenAndServe(":8002", router))
 }
+
 
 func initializeDB() {
     _, err := db.Exec(`
@@ -134,6 +136,7 @@ func initializeDB() {
         log.Fatal(err)
     }
 }
+
 
 func getMembresia(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
@@ -215,9 +218,6 @@ func getClientePagos(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(pagos)
 }
-
-
-
 
 
 func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
@@ -310,6 +310,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("Membresía renovada exitosamente"))
 }
 
+
 func updateMembresia(w http.ResponseWriter, r *http.Request) {
 
     var input struct {
@@ -338,6 +339,34 @@ func updateMembresia(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusOK)
     w.Write([]byte("Membresía actualizada"))
+}
+
+
+func cancelarMembresia(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    dni := vars["dni"]
+
+    _, err := db.Exec(`
+        UPDATE membresia_cliente
+        SET estado = 'CANCELADA'
+        WHERE dni = $1
+    `, dni)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    response := struct {
+        Status  string `json:"status"`
+        Message string `json:"message"`
+    }{
+        Status:  "success",
+        Message: "Membresía cancelada",
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(response)
 }
 
 /*
