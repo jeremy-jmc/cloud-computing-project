@@ -61,13 +61,12 @@ def verificar_membresia(dni_cliente: str):
         }
     
     elif status == 200:
-        # Si la membresía está activa, responde a la UI con un mensaje de confirmación.
-        membresia_info = requests.get(f"{API_MEMBRESIAS}/membresias/{dni_cliente}").json()
+        membresia_info = response.get("membresia", {})
         if membresia_info["estado"].lower() != "activa":
             promociones_exclusivas = requests.get(f"{API_PROMOCIONES}/promociones_exclusivas/{dni_cliente}").json()
+
         return {
             **response,
-            "membresia": membresia_info,
             "promociones": promociones_generales,
             "promociones_exclusivas": promociones_exclusivas
         }

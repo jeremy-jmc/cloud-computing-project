@@ -2,10 +2,12 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Cliente, ClienteModel, ClienteInvitado,  truncate_table, ClienteInvitadoModel
-
+import requests
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+API_MEMBRESIAS = "http://api-membresias-golang:8002"
 
 # Add this after creating the FastAPI app
 app.add_middleware(
@@ -58,7 +60,10 @@ def read_cliente_real(dni: str, db : Session = Depends(get_db)):
             "message": "Cliente no encontrado",
             "data": None
         }
-        
+    
+    # Si la membresía está activa, responde a la UI con un mensaje de confirmación.
+    membresia_info = requests.get(f"{API_MEMBRESIAS}/membresias/{dni}").json()
+    
     return {
         "status": "200",
         "message": "Cliente encontrado",
@@ -67,7 +72,8 @@ def read_cliente_real(dni: str, db : Session = Depends(get_db)):
             "nombre": db_cliente.nombre,
             "apellido": db_cliente.apellido, 
             "email": db_cliente.email,
-        }
+        },
+        "membresia": membresia_info
     }
 
 @app.get("/clientes/invitado/{dni}")
