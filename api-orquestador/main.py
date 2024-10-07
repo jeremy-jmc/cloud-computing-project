@@ -61,15 +61,9 @@ def verificar_membresia(dni_cliente: str):
         }
     
     elif status == 200:
-<<<<<<< Updated upstream
         membresia_info = response.get("membresia", {})
         promociones_exclusivas = []
         if membresia_info["estado"].lower() != "activa":
-=======
-        # Si la membresía está activa, responde a la UI con un mensaje de confirmación.
-        membresia_info = requests.get(f"{API_MEMBRESIAS}/membresias/{dni_cliente}").json()
-        if membresia_info["estado"].lower() != "activo":
->>>>>>> Stashed changes
             promociones_exclusivas = requests.get(f"{API_PROMOCIONES}/promociones_exclusivas/{dni_cliente}").json()
 
         return {
@@ -85,17 +79,11 @@ def verificar_membresia(dni_cliente: str):
         }
 
 @app.post("/cancelar_membresia")
-async def cancelar_membresia(body: dict):
-    try:
-        response = requests.put(f"{API_MEMBRESIAS}/cancelar-membresia/{body['dni']}")
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Error calling membresias API: {str(e)}")
-        return {"status": "500", "message": f"Error: {str(e)}"}
-    except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        return {"status": "500", "message": "Unexpected server error"}
+def cancelar_membresia(dni_cliente: str):
+    print(f"Cancelando membresia de {dni_cliente}")
+    response = requests.post(f"{API_MEMBRESIAS}/cancelar_membresia/{dni_cliente}")
+    return response.json()
+
 @app.post("/renovar_membresia")
 def renovar_membresia(body: dict):
     response = requests.post(f"{API_MEMBRESIAS}/membresias/", json=body)
