@@ -63,7 +63,7 @@ def verificar_membresia(dni_cliente: str):
     elif status == 200:
         membresia_info = response.get("membresia", {})
         promociones_exclusivas = []
-        if membresia_info["estado"].lower() != "activa":
+        if membresia_info["estado"].lower() != "activo":
             promociones_exclusivas = requests.get(f"{API_PROMOCIONES}/promociones_exclusivas/{dni_cliente}").json()
 
         return {
