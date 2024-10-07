@@ -266,9 +266,16 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
     fmt.Println("metodoPago: ", input.MetodoPago)
     
 
+    type Response struct {
+        PromoID    int     `json:"promo_id"`
+        DNI        string  `json:"dni"`
+        ClienteID  int     `json:"cliente_id"`
+        FechaFin  string  `json:"fecha_fin"`
+    } 
+
     var clienteID int
     var fechaFin string
-    err = db.QueryRow("SELECT cliente_id, fecha_fin FROM membresia_cliente WHERE dni = $1", input.DNI).Scan(&clienteID, &fechaFin)
+    err = db.QueryRow("SELECT cliente_id, fecha_fin FROM membresia_cliente WHERE dni = $1 ORDER BY fecha_fin DESC LIMIT 1;", input.DNI).Scan(&clienteID, &fechaFin)
 
     // Si el cliente no existe, se crea una nueva membresía
     if err == sql.ErrNoRows {
@@ -278,13 +285,13 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
 
         err = db.QueryRow(`
         INSERT INTO membresia_cliente (promo_id, dni, fecha_inicio, fecha_fin, estado)
-        VALUES ($1, $2, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 month', 'activa') RETURNING cliente_id
-        `, input.PromoID,  input.DNI).Scan(&clienteID)
+        VALUES ($1, $2, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 month', 'activa') RETURNING cliente_id, fecha_fin
+        `, input.PromoID,  input.DNI).Scan(&clienteID, &fechaFin)
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
-        fmt.Println("cliente_id: ", clienteID)
+
 
         _, err = db.Exec(`
             INSERT INTO membresia_pagos (promo_id, cliente_id, fecha_pago, monto, metodo_pago)
@@ -297,18 +304,27 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
         }
 
         
-
+        response := Response{
+            PromoID:    input.PromoID,
+            DNI:        input.DNI,
+            FechaFin:   fechaFin,
+            ClienteID:  clienteID,
+        }
         
         w.WriteHeader(http.StatusOK)
-        w.Write([]byte("Membresía creada exitosamente"))
+        json.NewEncoder(w).Encode( response )
         return
     } else if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
     // Si el cliente existe, se crea una nueva membresía
-    parse_fechaInit, _ := time.Parse("2006-01-02T15:04:05", fechaFin)
+    parse_fechaInit, _ := time.Parse("2006-01-02T15:04:05Z", fechaFin)
+
+    // Add 1 month
     parse_fechaFin := parse_fechaInit.AddDate(0, 1, 0)
+
+    
 
 
     err = db.QueryRow(`
@@ -320,7 +336,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
         return
     }
     // print
-    fmt.Println("cliente_id: ", clienteID)
+
 
     _, err = db.Exec(`
         INSERT INTO membresia_pagos (promo_id, cliente_id, fecha_pago, monto, metodo_pago)
@@ -332,8 +348,20 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    
+
+    response := Response{
+        PromoID:    input.PromoID,
+        DNI:        input.DNI,
+        FechaFin:  parse_fechaFin.String(),
+        ClienteID:  clienteID,
+    }
+
     w.WriteHeader(http.StatusOK)
-    w.Write([]byte("Membresía renovada exitosamente"))
+    //w.Write([]byte("Membresía renovada exitosamente"))
+    json.NewEncoder(w).Encode( response )
+
+
 }
 
 

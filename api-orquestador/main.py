@@ -25,6 +25,7 @@ def api_promociones():
 
 API_CLIENTES = "http://api-clientes-fastapi:8001"
 API_MEMBRESIAS = "http://api-membresias-golang:8002"
+#API_MEMBRESIAS = "http://localhost:8002"
 API_PROMOCIONES = "http://api-promociones-nodejs:8003"
 
 
@@ -67,11 +68,11 @@ def verificar_membresia(dni_cliente: str):
         }
 
 
-# @app.post("/renovar_membresia")
-# def renovar_membresia(dni_cliente: str):
-#     print(f"Renovando membresia de {dni_cliente}")
-#     response = requests.post(f"{API_MEMBRESIAS}/renovar_membresia/{dni_cliente}")
-#     return response.json()
+@app.post("/renovar_membresia")
+def renovar_membresia(body: dict):
+    response = requests.post(f"{API_MEMBRESIAS}/membresias/", json=body)
+    return response.json()
+    
 
 """
 INSERT INTO mysql.cliente_real VALUES 
