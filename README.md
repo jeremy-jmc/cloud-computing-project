@@ -8,3 +8,5 @@
 - API promociones:
 - API orquestador: FastAPI
 
+# UI (https://github.com/edu-arr99/UI-gym-cloud-computing)
+- NextJS
