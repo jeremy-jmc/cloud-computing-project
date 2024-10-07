@@ -1,47 +1,138 @@
 openapi: 3.0.0
 info:
   title: API de Membresías
-  description: API para gestionar las membresías del gimnasio.
   version: 1.0.0
+  description: API para gestionar membresías, pagos y clientes.
 
 servers:
-  - url: http://localhost:8002
-    description: Servidor de desarrollo
+  - url: "http://lb-prod-1093716168.us-east-1.elb.amazonaws.com:5002"
 
 paths:
-  /membresias/{dni}:
-    parameters:
-      - in: path
-        name: dni
-        required: true
-        schema:
-          type: string
+  /:
     get:
-      summary: Verificar membresía por DNI
+      summary: Verifica el estado de la API.
       responses:
         '200':
-          description: Detalles de la membresía
+          description: Respuesta exitosa.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id:
+                  status_code:
                     type: integer
-                  tipo:
+                    example: 200
+                  message:
                     type: string
+                    example: "API Membresias is alive"
+
+  /membresias/{dni}:
+    get:
+      summary: Obtiene la información de la membresía del cliente.
+      parameters:
+        - in: path
+          name: dni
+          required: true
+          schema:
+            type: string
+          description: DNI del cliente.
+      responses:
+        '200':
+          description: Membresía encontrada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cliente_id:
+                    type: integer
+                  dni:
+                    type: string
+                  promo_id:
+                    type: integer
                   fecha_inicio:
                     type: string
                   fecha_fin:
                     type: string
                   estado:
                     type: string
+        '404':
+          description: Membresía no encontrada.
+
+  /pagos/{dni}:
+    get:
+      summary: Obtiene los pagos del cliente.
+      parameters:
+        - in: path
+          name: dni
+          required: true
+          schema:
+            type: string
+          description: DNI del cliente.
+      responses:
+        '200':
+          description: Lista de pagos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    pago_id:
+                      type: integer
+                    promo_id:
+                      type: integer
+                    cliente_id:
+                      type: integer
+                    fecha_pago:
+                      type: string
+                    monto:
+                      type: number
+                      format: float
+                    metodo_pago:
+                      type: string
+        '404':
+          description: Cliente no encontrado.
+
+  /membresias/:
+    post:
+      summary: Crea o renueva una membresía.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                promo_id:
+                  type: integer
+                dni:
+                  type: string
+                monto:
+                  type: number
+                  format: float
+                metodo_pago:
+                  type: string
+      responses:
+        '200':
+          description: Membresía creada o renovada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  promo_id:
+                    type: integer
+                  dni:
+                    type: string
                   cliente_id:
                     type: integer
-        '404':
-          description: Membresía no encontrada
-    post:
-      summary: Crear o renovar una membresía
+                  fecha_fin:
+                    type: string
+
+    put:
+      summary: Actualiza el estado de una membresía existente.
       requestBody:
         required: true
         content:
@@ -49,28 +140,42 @@ paths:
             schema:
               type: object
               properties:
-                tipo:
-                  type: string
                 cliente_id:
                   type: integer
+                dni:
+                  type: string
+                estado:
+                  type: string
       responses:
         '200':
-          description: Membresía creada o renovada exitosamente
+          description: Membresía actualizada.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Membresía actualizada"
+
+  /cancelar-membresia/{dni}:
     put:
-      summary: Actualizar membresía
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                tipo:
-                  type: string
-                fecha_inicio:
-                  type: string
-                fecha_fin:
-                  type: string
+      summary: Cancela la membresía de un cliente.
+      parameters:
+        - in: path
+          name: dni
+          required: true
+          schema:
+            type: string
+          description: DNI del cliente.
       responses:
         '200':
-          description: Membresía actualizada
+          description: Membresía cancelada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Membresía cancelada"

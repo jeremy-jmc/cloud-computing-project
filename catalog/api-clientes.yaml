@@ -1,106 +1,168 @@
 openapi: 3.0.0
 info:
-  title: API de Clientes
-  description: API para gestionar los clientes del gimnasio.
-  version: 1.0.0
+  title: API Orquestador
+  description: API para interactuar con los servicios de clientes, membresías y promociones.
+  version: "1.0.0"
 
 servers:
-  - url: http://localhost:8001
-    description: Servidor de desarrollo
+  - url: "http://localhost:8000"
 
 paths:
-  /clientes/{dni}:
-    parameters:
-      - in: path
-        name: dni
-        required: true
-        schema:
-          type: string
+  /:
     get:
-      summary: Obtener cliente por DNI
+      summary: Verificar el estado de la API
+      operationId: is_alive
       responses:
-        '200':
-          description: Detalles del cliente
+        "200":
+          description: Respuesta exitosa
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: integer
-                    example: 1
-                  nombre:
+                  message:
                     type: string
-                    example: "Juan Perez"
-                  dni:
-                    type: string
-                    example: "12345678"
-                  correo:
-                    type: string
-                    example: "juanperez@example.com"
-                  telefono:
-                    type: string
-                    example: "+51987654321"
-                  membresia_id:
-                    type: integer
-                    example: 2
-        '404':
-          description: Cliente no encontrado
+                    example: API Orquestador is alive
 
-    put:
-      summary: Actualizar cliente por DNI
+  /api_clientes/:
+    get:
+      summary: Obtener datos de clientes
+      operationId: api_clientes
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientes:
+                    type: array
+                    items:
+                      type: object
+
+  /api_membresias/:
+    get:
+      summary: Obtener datos de membresías
+      operationId: api_membresias
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  membresias:
+                    type: array
+                    items:
+                      type: object
+
+  /api_promociones/:
+    get:
+      summary: Obtener datos de promociones
+      operationId: api_promociones
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  promociones:
+                    type: array
+                    items:
+                      type: object
+
+  /verificar_membresia/{dni_cliente}:
+    get:
+      summary: Verificar estado de membresía
+      operationId: verificar_membresia
+      parameters:
+        - name: dni_cliente
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "200"
+                  message:
+                    type: string
+                  promociones:
+                    type: array
+                    items:
+                      type: object
+                  promociones_exclusivas:
+                    type: array
+                    items:
+                      type: object
+        "404":
+          description: Cliente no encontrado
+        "500":
+          description: Error en la solicitud
+
+  /cancelar_membresia:
+    post:
+      summary: Cancelar membresía
+      operationId: cancelar_membresia
+      parameters:
+        - name: dni_cliente
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "200"
+                  message:
+                    type: string
+        "500":
+          description: Error en la solicitud
+
+  /renovar_membresia:
+    post:
+      summary: Renovar membresía
+      operationId: renovar_membresia
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                nombre:
+                cliente:
                   type: string
-                  example: "Juan Perez"
-                correo:
+                membresia:
                   type: string
-                  example: "juanperez@example.com"
-                telefono:
-                  type: string
-                  example: "+51987654321"
       responses:
-        '200':
-          description: Cliente actualizado exitosamente
+        "200":
+          description: Respuesta exitosa
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  mensaje:
+                  status:
                     type: string
-                    example: "Cliente actualizado correctamente"
-                  detalles_cliente:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      nombre:
-                        type: string
-                        example: "Juan Perez"
-                      dni:
-                        type: string
-                        example: "12345678"
-                      correo:
-                        type: string
-                        example: "juanperez@example.com"
-                      telefono:
-                        type: string
-                        example: "+51987654321"
-        '404':
-          description: Cliente no encontrado
-
-    delete:
-      summary: Eliminar cliente por DNI
-      responses:
-        '200':
-          description: Cliente eliminado exitosamente
-        '404':
-          description: Cliente no encontrado
+                    example: "200"
+                  message:
+                    type: string
+        "500":
+          description: Error en la solicitud

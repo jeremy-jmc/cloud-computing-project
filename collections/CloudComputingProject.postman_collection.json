@@ -1,83 +1,708 @@
 {
 	"info": {
-		"_postman_id": "1559f449-0e69-4693-8561-bca698c674a3",
+		"_postman_id": "886c48d1-caac-4bc5-81a0-3105264e630c",
 		"name": "CloudComputingProject",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "19056600"
 	},
 	"item": [
 		{
-			"name": "OrquestadorAlive",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{api_orquestador}}",
-					"host": [
-						"{{api_orquestador}}"
-					]
+			"name": "Orquestador",
+			"item": [
+				{
+					"name": "OrquestadorAlive",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_orquestador}}",
+							"host": [
+								"{{api_orquestador}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OrquestadorVerificarMembresia",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_orquestador}}/verificar_membresia/88888888/",
+							"host": [
+								"{{api_orquestador}}"
+							],
+							"path": [
+								"verificar_membresia",
+								"88888888",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OrquestadorRenovarMembresia",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"promo_id\": 1024,\n    \"dni\": \"72869882\",\n    \"monto\": 100.0,\n    \"metodo_pago\": \"tarjeta\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_orquestador}}/renovar_membresia/",
+							"host": [
+								"{{api_orquestador}}"
+							],
+							"path": [
+								"renovar_membresia",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Conexion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_orquestador}}/api_clientes/",
+							"host": [
+								"{{api_orquestador}}"
+							],
+							"path": [
+								"api_clientes",
+								""
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "OrquestadorVerificarMembresia",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{api_orquestador}}/verificar_membresia/77777777/",
-					"host": [
-						"{{api_orquestador}}"
-					],
-					"path": [
-						"verificar_membresia",
-						"77777777",
-						""
-					]
+			"name": "Promociones",
+			"item": [
+				{
+					"name": "PromocionesGetCampaña",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_promociones}}/promociones/",
+							"host": [
+								"{{api_promociones}}"
+							],
+							"path": [
+								"promociones",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PromocionesExclusivas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_promociones}}/promociones_exclusivas/77777777",
+							"host": [
+								"{{api_promociones}}"
+							],
+							"path": [
+								"promociones_exclusivas",
+								"77777777"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "OrquestadorRenovarMembresia",
+			"name": "Membresias",
+			"item": [
+				{
+					"name": "MembresiasCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"promo_id\": 1024,\n    \"dni\": \"72869882\",\n    \"monto\": 100.0,\n    \"metodo_pago\": \"tarjeta\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_membresias}}/membresias/",
+							"host": [
+								"{{api_membresias}}"
+							],
+							"path": [
+								"membresias",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MembresiasGetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_membresias}}/membresias/72869882",
+							"host": [
+								"{{api_membresias}}"
+							],
+							"path": [
+								"membresias",
+								"72869882"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CancelarMembresia",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{api_membresias}}/cancelar-membresia/{{cliente_real}}",
+							"host": [
+								"{{api_membresias}}"
+							],
+							"path": [
+								"cancelar-membresia",
+								"{{cliente_real}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clientes",
+			"item": [
+				{
+					"name": "LeerClientesReales",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_clientes}}/clientes/real/",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"real",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LeerClientesInvitados",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_clientes}}/clientes/invitado/",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"invitado",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetClienteReal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_clientes}}/clientes/real/{{cliente_real}}",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"real",
+								"{{cliente_real}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetClienteInvitado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_clientes}}/clientes/invitado/{{cliente_invitado}}",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"invitado",
+								"{{cliente_invitado}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CrearClienteReal",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dni\": \"12345678\",\n    \"nombre\": \"Something\",\n    \"apellido\": \"New\",\n    \"email\": \"something_new@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_clientes}}/clientes/real/",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"real",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CrearClienteInvitado",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dni\": \"87654321\",\n    \"nombre\": \"Another\",\n    \"apellido\": \"One\",\n    \"email\": \"another_one@gmail.com\",\n    \"referido_por\": \"12345678\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_clientes}}/clientes/invitado/",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"invitado",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateCliente",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dni\": \"77777777\",\n    \"nombre\": \"Juan\",\n    \"apellido\": \"Doe\",\n    \"email\": \"juan.doe@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_clientes}}/clientes/",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "UI",
+			"item": [
+				{
+					"name": "OrquestadorRenovarMembresia",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"promo_id\": 2,\n    \"dni\": \"77777777\",\n    \"monto\": 30.0,\n    \"metodo_pago\": \"tarjeta\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_orquestador}}/renovar_membresia/",
+							"host": [
+								"{{api_orquestador}}"
+							],
+							"path": [
+								"renovar_membresia",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MembresiaInfo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_membresias}}/membresias/{{cliente_real}}",
+							"host": [
+								"{{api_membresias}}"
+							],
+							"path": [
+								"membresias",
+								"{{cliente_real}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ClienteReal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_clientes}}/clientes/real/{{cliente_real}}",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"real",
+								"{{cliente_real}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ClienteInvitado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_clientes}}/clientes/invitado/{{cliente_invitado}}",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								"invitado",
+								"{{cliente_invitado}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CancelarMembresia",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{api_membresias}}/cancelar-membresia/{{cliente_real}}",
+							"host": [
+								"{{api_membresias}}"
+							],
+							"path": [
+								"cancelar-membresia",
+								"{{cliente_real}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ClienteUpdate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dni\": \"77777777\",\n    \"nombre\": \"Juan\",\n    \"apellido\": \"Doe\",\n    \"email\": \"juan.doe@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_clientes}}/clientes/",
+							"host": [
+								"{{api_clientes}}"
+							],
+							"path": [
+								"clientes",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VerificarMembresiaSuccess",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_orquestador}}/verificar_membresia/{{cliente_real}}",
+							"host": [
+								"{{api_orquestador}}"
+							],
+							"path": [
+								"verificar_membresia",
+								"{{cliente_real}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VerificarMembresiaFail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_orquestador}}/verificar_membresia/{{cliente_invitado}}",
+							"host": [
+								"{{api_orquestador}}"
+							],
+							"path": [
+								"verificar_membresia",
+								"{{cliente_invitado}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PromocionesExclusivas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_promociones}}/promociones_exclusivas/{{cliente_real}}",
+							"host": [
+								"{{api_promociones}}"
+							],
+							"path": [
+								"promociones_exclusivas",
+								"{{cliente_real}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PromocionesToday",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_promociones}}/promociones/",
+							"host": [
+								"{{api_promociones}}"
+							],
+							"path": [
+								"promociones",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "createMembresia",
 			"request": {
 				"method": "POST",
-				"header": []
-			},
-			"response": []
-		},
-		{
-			"name": "PromocionesGetCampaña",
-			"request": {
-				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"name": "cache-control",
+						"sortOrder": 2,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "postman-token",
+						"sortOrder": 3,
+						"infoTitle": "We recommend using this header",
+						"info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Postman-Token",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "content-type",
+						"sortOrder": 4,
+						"infoTitle": "This header was automatically added",
+						"info": "The Content-Type header is added to help the server identify the media type of the request body that is present in this request.\n\nUse the request body tab to control the value or to remove this header.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to body",
+						"key": "Content-Type",
+						"value": "application/json",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "content-length",
+						"sortOrder": 5,
+						"infoTitle": "This header was automatically added",
+						"info": "The Content-Length header was added to indicate to the server the size of the request body that is added to this request. Server uses this value to parse the request body accurately.\n\nYou can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to body",
+						"key": "Content-Length",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "host",
+						"sortOrder": 6,
+						"infoTitle": "We recommend using this header",
+						"info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Host",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "user-agent",
+						"sortOrder": 7,
+						"infoTitle": "We recommend using this header",
+						"info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.39.1",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept",
+						"sortOrder": 8,
+						"infoTitle": "We recommend using this header",
+						"info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept",
+						"value": "*/*",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept-encoding",
+						"sortOrder": 9,
+						"infoTitle": "We recommend using this header",
+						"info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept-Encoding",
+						"value": "gzip, deflate, br",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "connection",
+						"sortOrder": 10,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Connection",
+						"value": "keep-alive",
+						"system": true,
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"promo_id\": 1024,\n    \"dni\": \"72869881\",\n    \"monto\": 100.0,\n    \"metodo_pago\": \"tarjeta\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "{{api_promociones}}/promociones/",
+					"raw": "localhost:8002/membresias/",
 					"host": [
-						"{{api_promociones}}"
+						"localhost"
 					],
+					"port": "8002",
 					"path": [
-						"promociones",
+						"membresias",
 						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "PromocionesExclusivas",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{api_promociones}}/promociones_exclusivas/77777777",
-					"host": [
-						"{{api_promociones}}"
-					],
-					"path": [
-						"promociones_exclusivas",
-						"77777777"
 					]
 				}
 			},
@@ -107,22 +732,32 @@
 	"variable": [
 		{
 			"key": "api_orquestador",
-			"value": "localhost:8000",
+			"value": "localhost:5000",
 			"type": "string"
 		},
 		{
 			"key": "api_clientes",
-			"value": "localhost:8001",
+			"value": "localhost:5001",
 			"type": "string"
 		},
 		{
 			"key": "api_membresias",
-			"value": "localhost:8002",
+			"value": "localhost:5002",
 			"type": "string"
 		},
 		{
 			"key": "api_promociones",
-			"value": "localhost:8003",
+			"value": "localhost:5003",
+			"type": "string"
+		},
+		{
+			"key": "cliente_real",
+			"value": "77777777",
+			"type": "string"
+		},
+		{
+			"key": "cliente_invitado",
+			"value": "11111111",
 			"type": "string"
 		}
 	]

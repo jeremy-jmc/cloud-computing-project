@@ -1,119 +1,172 @@
 openapi: 3.0.0
 info:
   title: API Orquestador
-  description: Orquesta la verificación, visualización de promociones y renovación de membresías.
+  description: API para interactuar con los servicios de clientes, membresías y promociones.
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8004
-    description: Servidor de desarrollo
+  - url: "http://lb-prod-1093716168.us-east-1.elb.amazonaws.com:5000"
 
 paths:
-  /orquestador/verificar_membresia:
-    post:
-      summary: Verificar si un cliente tiene una membresía activa o caducada
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dni:
-                  type: string
-                  example: "12345678"
-      responses:
-        '200':
-          description: Membresía verificada exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  mensaje:
-                    type: string
-                    example: "Membresía activa"
-                  detalles_membresia:
-                    type: object
-                    properties:
-                      tipo:
-                        type: string
-                        example: "Mensual"
-                      fecha_fin:
-                        type: string
-                        example: "2024-12-31"
-        '404':
-          description: Cliente o membresía no encontrados
-
-  /orquestador/mostrar_promos:
+  /:
     get:
-      summary: Mostrar las promociones disponibles
+      summary: Verificar el estado de la API
+      operationId: is_alive
       responses:
-        '200':
-          description: Lista de promociones disponibles
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    promocion_id:
-                      type: integer
-                      example: 1
-                    nombre:
-                      type: string
-                      example: "Descuento Verano"
-                    descuento:
-                      type: number
-                      example: 20
-                    tipo_membresia:
-                      type: string
-                      example: "Anual"
-        '404':
-          description: No hay promociones disponibles
-
-  /orquestador/renovar_membresia:
-    post:
-      summary: Renovar la membresía del cliente aplicando una promoción
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dni:
-                  type: string
-                  example: "12345678"
-                promocion_id:
-                  type: integer
-                  example: 1
-      responses:
-        '200':
-          description: Membresía renovada exitosamente
+        "200":
+          description: Respuesta exitosa
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  mensaje:
+                  message:
                     type: string
-                    example: "Membresía renovada exitosamente"
-                  detalles_membresia:
-                    type: object
-                    properties:
-                      tipo:
-                        type: string
-                        example: "Anual"
-                      fecha_fin:
-                        type: string
-                        example: "2025-12-31"
-                      descuento_aplicado:
-                        type: number
-                        example: 20
-        '404':
-          description: Cliente, membresía o promoción no encontrados
+                    example: API Orquestador is alive
+
+  /api_clientes/:
+    get:
+      summary: Obtener datos de clientes
+      operationId: api_clientes
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientes:
+                    type: array
+                    items:
+                      type: object
+
+  /api_membresias/:
+    get:
+      summary: Obtener datos de membresías
+      operationId: api_membresias
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  membresias:
+                    type: array
+                    items:
+                      type: object
+
+  /api_promociones/:
+    get:
+      summary: Obtener datos de promociones
+      operationId: api_promociones
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  promociones:
+                    type: array
+                    items:
+                      type: object
+
+  /verificar_membresia/{dni_cliente}:
+    get:
+      summary: Verificar estado de membresía
+      operationId: verificar_membresia
+      parameters:
+        - name: dni_cliente
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "200"
+                  message:
+                    type: string
+                  promociones:
+                    type: array
+                    items:
+                      type: object
+                  promociones_exclusivas:
+                    type: array
+                    items:
+                      type: object
+        "404":
+          description: Cliente no encontrado
+        "500":
+          description: Error en la solicitud
+
+  /cancelar_membresia:
+    post:
+      summary: Cancelar membresía
+      operationId: cancelar_membresia
+      parameters:
+        - name: dni_cliente
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "200"
+                  message:
+                    type: string
+        "500":
+          description: Error en la solicitud
+
+  /renovar_membresia:
+    post:
+      summary: Renovar membresía
+      operationId: renovar_membresia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cliente:
+                  type: string
+                membresia:
+                  type: string
+      responses:
+        "200":
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "200"
+                  message:
+                    type: string
+        "500":
+          description: Error en la solicitud
+
 
 # * UI (DNI) → Orquestador (POST /orquestador/verificar_membresia):
 

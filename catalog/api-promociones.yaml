@@ -1,50 +1,126 @@
 openapi: 3.0.0
 info:
   title: API de Promociones
-  description: API para gestionar las promociones disponibles.
+  description: API para gestionar promociones exclusivas y campañas.
   version: 1.0.0
-
 servers:
-  - url: http://localhost:8003
-    description: Servidor de desarrollo
-
+  - url: "http://lb-prod-1093716168.us-east-1.elb.amazonaws.com:5003"
+    description: Servidor local de desarrollo
 paths:
-  /promociones:
+  /:
     get:
-      summary: Obtener todas las promociones
+      summary: Verificar el estado de la API
+      description: Retorna un mensaje indicando que la API está activa.
       responses:
         '200':
-          description: Un arreglo JSON de promociones
+          description: API activa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API Promociones is alive
+  /promociones:
+    get:
+      summary: Obtener promociones de campañas activas
+      description: Retorna las campañas que están activas en la fecha actual.
+      responses:
+        '200':
+          description: Lista de campañas activas
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    promocion_id:
-                      type: integer
-                    nombre:
-                      type: string
-                    descuento:
-                      type: number
-                    tipo_membresia:
-                      type: string
-    post:
-      summary: Crear una nueva promoción
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                nombre:
-                  type: string
-                descuento:
-                  type: number
-                tipo_membresia:
-                  type: string
+                  $ref: '#/components/schemas/Campania'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal Server Error
+  /promociones_exclusivas/{dni}:
+    get:
+      summary: Obtener promociones exclusivas por DNI
+      description: Retorna las promociones exclusivas asociadas a un DNI específico.
+      parameters:
+        - name: dni
+          in: path
+          required: true
+          schema:
+            type: string
+          description: El DNI del cliente
       responses:
         '200':
-          description: Promoción creada
+          description: Lista de promociones exclusivas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Promocion'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal Server Error
+components:
+  schemas:
+    Promocion:
+      type: object
+      properties:
+        promocion_id:
+          type: integer
+          example: 1
+        monto:
+          type: number
+          example: 100.5
+        nombre:
+          type: string
+          example: Promoción de Verano
+        descripcion:
+          type: string
+          example: Promoción exclusiva para clientes selectos
+        fecha_inicio:
+          type: string
+          example: '2024-01-01'
+        fecha_fin:
+          type: string
+          example: '2024-01-31'
+        dni:
+          type: string
+          example: 12345678
+    Campania:
+      type: object
+      properties:
+        campania_id:
+          type: integer
+          example: 1
+        monto:
+          type: number
+          example: 500.75
+        nombre:
+          type: string
+          example: Campaña Navideña
+        descripcion:
+          type: string
+          example: Campaña de promociones navideñas
+        fecha_inicio:
+          type: string
+          format: date
+          example: '2024-12-01'
+        fecha_fin:
+          type: string
+          format: date
+          example: '2024-12-31'
