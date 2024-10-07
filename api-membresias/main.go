@@ -269,6 +269,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
     
 
     type Response struct {
+        Status    string  `json:"status"`
         PromoID    int     `json:"promo_id"`
         DNI        string  `json:"dni"`
         ClienteID  int     `json:"cliente_id"`
@@ -307,6 +308,7 @@ func createOrRenewMembresia(w http.ResponseWriter, r *http.Request) {
 
         
         response := Response{
+            Status:   "success",
             PromoID:    input.PromoID,
             DNI:        input.DNI,
             FechaFin:   fechaFin,
