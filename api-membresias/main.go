@@ -10,6 +10,7 @@ import (
     "time"
 
 	"github.com/gorilla/mux"
+    "github.com/rs/cors"
 	_ "github.com/lib/pq"
 )
 
@@ -98,9 +99,10 @@ func main() {
     router.HandleFunc("/membresias/", createOrRenewMembresia).Methods("POST")
     router.HandleFunc("/membresias/", updateMembresia).Methods("PUT")
     router.HandleFunc("/cancelar-membresia/{dni}", cancelarMembresia).Methods("PUT")
-
+    handler := cors.Default().Handler(router)
+    
     fmt.Println("Servidor corriendo en el puerto 8002")
-    log.Fatal(http.ListenAndServe(":8002", router))
+    log.Fatal(http.ListenAndServe(":8002", handler))
 }
 
 

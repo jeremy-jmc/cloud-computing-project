@@ -3,7 +3,19 @@ from sqlalchemy.orm import Session
 from db import get_db
 from models import Cliente, ClienteModel, ClienteInvitado,  truncate_table, ClienteInvitadoModel
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+# Add this after creating the FastAPI app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 
 @app.get("/")
 def is_alive():

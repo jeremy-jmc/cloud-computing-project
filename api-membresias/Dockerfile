@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN go get github.com/gorilla/mux && go get github.com/lib/pq
+RUN go get github.com/gorilla/mux && go get github.com/lib/pq && go get github.com/rs/cors
 
 EXPOSE 8002
 

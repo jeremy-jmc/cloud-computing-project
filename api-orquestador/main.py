@@ -2,7 +2,18 @@ from fastapi import FastAPI, Depends, HTTPException
 import requests
 import logging
 
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+# Add this after creating the FastAPI app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 
 
 @app.get("/api_clientes/")
@@ -67,6 +78,11 @@ def verificar_membresia(dni_cliente: str):
             "data": None
         }
 
+@app.post("/cancelar_membresia")
+def cancelar_membresia(dni_cliente: str):
+    print(f"Cancelando membresia de {dni_cliente}")
+    response = requests.post(f"{API_MEMBRESIAS}/cancelar_membresia/{dni_cliente}")
+    return response.json()
 
 @app.post("/renovar_membresia")
 def renovar_membresia(body: dict):
