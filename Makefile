@@ -1,5 +1,5 @@
 up:
-	clear && docker compose up --build
+	clear && docker compose -f ./docker-compose-dev.yaml up --build
 api-logs:
 	clear && docker compose logs -f api_membresias api_promociones api_clientes api_orquestador
 occupied-ports:
